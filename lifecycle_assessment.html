@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Recurring Revenue Management Life Cycle Assessment</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #ffffff;
+      padding: 20px;
+      width: 1400px;
+    }
+    
+    h1 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 6px;
+    }
+    
+    .subtitle {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    
+    .score-guide {
+      display: table;
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px 15px;
+      background: #f5f5f5;
+      border-radius: 6px;
+    }
+    
+    .score-guide-inner {
+      display: table-row;
+    }
+    
+    .score-guide-item {
+      display: table-cell;
+      vertical-align: middle;
+      padding-right: 30px;
+    }
+    
+    .score-box {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      text-align: center;
+      line-height: 22px;
+      font-size: 10px;
+      font-weight: bold;
+      color: white;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    
+    .score-box.importance { background: #E6007E; }
+    .score-box.readiness { background: #00A5A8; }
+    
+    .guide-text {
+      display: inline-block;
+      vertical-align: middle;
+    }
+    
+    .guide-label {
+      font-weight: 600;
+      font-size: 11px;
+      color: #333;
+    }
+    
+    .guide-scale {
+      font-size: 10px;
+      color: #666;
+    }
+    
+    .priority-text {
+      font-size: 10px;
+      color: #666;
+    }
+    
+    /* Main grid container */
+    .lifecycle-container {
+      width: 100%;
+    }
+    
+    /* Header row */
+    .header-row {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+    
+    .phase-header {
+      display: table-cell;
+      width: 12.5%;
+      padding: 8px 4px;
+      text-align: center;
+      color: white;
+      font-weight: 600;
+      font-size: 11px;
+      vertical-align: middle;
+      height: 45px;
+    }
+    
+    /* Phase colors */
+    .phase-configure { background: #2E7D32; }
+    .phase-quote { background: #1565C0; }
+    .phase-invoice { background: #7B1FA2; }
+    .phase-collect { background: #00838F; }
+    .phase-provision { background: #F9A825; color: #333; }
+    .phase-recognize { background: #6A1B9A; }
+    .phase-learn { background: #EF6C00; }
+    .phase-sustain { background: #1976D2; }
+    
+    /* Content rows */
+    .content-row {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+    
+    .capability-cell {
+      display: table-cell;
+      width: 12.5%;
+      padding: 2px;
+      vertical-align: top;
+    }
+    
+    .capability-card {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      padding: 5px;
+      height: 58px;
+    }
+    
+    .capability-name {
+      font-size: 8px;
+      font-weight: 600;
+      color: #333;
+      line-height: 1.2;
+      margin-bottom: 2px;
+    }
+    
+    .capability-sub {
+      font-size: 7px;
+      color: #999;
+      font-style: italic;
+      margin-bottom: 3px;
+    }
+    
+    .score-row {
+      display: table;
+      width: 100%;
+    }
+    
+    .score-cell {
+      display: table-cell;
+      width: 50%;
+      height: 16px;
+      border-radius: 2px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 8px;
+      font-weight: 600;
+      color: #888;
+    }
+    
+    .score-cell.importance {
+      background: #fce4ec;
+      border: 1px dashed #E6007E;
+    }
+    
+    .score-cell.readiness {
+      background: #e0f7fa;
+      border: 1px dashed #00A5A8;
+    }
+    
+    .empty-card {
+      background: #fafafa;
+      border: 1px solid #eee;
+    }
+    
+    .empty-card .capability-name {
+      color: #ddd;
+      text-align: center;
+    }
+    
+    .feedback-section {
+      margin-top: 12px;
+      text-align: center;
+    }
+    
+    .feedback-pill {
+      display: inline-block;
+      background: linear-gradient(90deg, #1976D2, #2E7D32);
+      padding: 6px 20px;
+      border-radius: 15px;
+      color: white;
+      font-size: 10px;
+    }
+    
+    .instructions {
+      margin-top: 15px;
+      padding: 12px 15px;
+      background: #fff8e1;
+      border-left: 3px solid #F9A825;
+      border-radius: 0 6px 6px 0;
+    }
+    
+    .instructions h3 {
+      font-size: 11px;
+      color: #333;
+      margin-bottom: 6px;
+    }
+    
+    .instructions ol {
+      font-size: 9px;
+      color: #555;
+      margin-left: 15px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Recurring Revenue Management Lifecycle Assessment — AI Lens</h1>
+  <p class="subtitle">Plot the importance/impact and strategic readiness for each capability in your Order-to-Cash ecosystem</p>
+  
+  <div class="score-guide">
+    <div class="score-guide-inner">
+      <div class="score-guide-item">
+        <span class="score-box importance">I</span>
+        <span class="guide-text">
+          <span class="guide-label">Importance / Impact</span><br/>
+          <span class="guide-scale">1 = Low importance → 10 = Critical</span>
+        </span>
+      </div>
+      <div class="score-guide-item">
+        <span class="score-box readiness">R</span>
+        <span class="guide-text">
+          <span class="guide-label">Strategic Readiness</span><br/>
+          <span class="guide-scale">1 = Not ready → 10 = Fully capable</span>
+        </span>
+      </div>
+      <div class="score-guide-item">
+        <span class="priority-text"><strong>Priority Matrix:</strong> High I + Low R = Urgent Gap | High I + High R = Strength | Low I = Deprioritize</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="lifecycle-container">
+    
+    <!-- Header Row -->
+    <div class="header-row">
+      <div class="phase-header phase-configure">Configure<br/>and Price</div>
+      <div class="phase-header phase-quote">Quote and<br/>Sell</div>
+      <div class="phase-header phase-invoice">Invoice</div>
+      <div class="phase-header phase-collect">Collect</div>
+      <div class="phase-header phase-provision">Provision</div>
+      <div class="phase-header phase-recognize">Recognize<br/>and Report</div>
+      <div class="phase-header phase-learn">Learn</div>
+      <div class="phase-header phase-sustain">Sustain<br/>and Grow</div>
+    </div>
+    
+    <!-- Row 1 -->
+    <div class="content-row">
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Offer/Catalog Management</div>
+          <div class="capability-sub">Price, Usage, Promo</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Opportunity Capture</div>
+          <div class="capability-sub">eCommerce, CRM, Partners</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Order Management</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Payment and Routing</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Entitlement Management</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Revenue Recognition</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Revenue and Profit Insights</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Churn Prevent</div>
+          <div class="capability-sub">Win-back Offers</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Row 2 -->
+    <div class="content-row">
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Price Management</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Customer and Partner Portals</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Billing, Invoice</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Customer Credit Management</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Inventory</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Accounting Ledger</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Customer Insights</div>
+          <div class="capability-sub">Churn Detect</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Renewals</div>
+          <div class="capability-sub">CPQ, Upsell/Cross-sell</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Row 3 -->
+    <div class="content-row">
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Revenue Planning</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Guided Selling</div>
+          <div class="capability-sub">CPQ, Price Guidance</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Rating and Charging</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Dunning and Payment Retry</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Fulfillment and Ship</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Usage and Entitlement Enforcement</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Offer Insights</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Customer Success</div>
+          <div class="capability-sub">Health, Education</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Row 4 -->
+    <div class="content-row">
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Incentive Management</div>
+          <div class="capability-sub">Rebates, Discounts</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Customer Risk and Fraud Check</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Usage Data Mediation</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Collections</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Deployment / Provisioning</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Reporting and Dashboards</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Customer Value Intelligence</div>
+          <div class="capability-sub">Transactions, Usage, Risk</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Row 5 -->
+    <div class="content-row">
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Channel Management</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Contract Management</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Anomaly Detection</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Partner Settlement</div>
+          <div class="capability-sub">Incentives and Payment</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Tax</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Price/Profit Optimization</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Row 6 -->
+    <div class="content-row">
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Inventory/Ship Availability</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Dispute Prediction</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Compliance</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Partner/Channel Intelligence</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Row 7 -->
+    <div class="content-row">
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card">
+          <div class="capability-name">Benchmarks</div>
+          <div class="score-row">
+            <div class="score-cell importance">I:___</div>
+            <div class="score-cell readiness">R:___</div>
+          </div>
+        </div>
+      </div>
+      <div class="capability-cell">
+        <div class="capability-card empty-card">
+          <div class="capability-name">—</div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- Feedback Loop -->
+  <div class="feedback-section">
+    <div class="feedback-pill">
+      ↩ <strong>Feedback Loop:</strong> Insights from "Sustain and Grow" inform the next "Configure and Price" cycle ↩
+    </div>
+  </div>
+  
+  <div class="instructions">
+    <h3>How to Use This Assessment</h3>
+    <ol>
+      <li><strong>Score Importance (I):</strong> How critical is this capability to your business goals? (1 = nice-to-have, 10 = business-critical)</li>
+      <li><strong>Score Readiness (R):</strong> How prepared is your organization to execute? (1 = major gaps, 10 = fully operational)</li>
+      <li><strong>Identify Gaps:</strong> High I + Low R = Urgent priorities for investment</li>
+      <li><strong>Validate Strengths:</strong> High I + High R = Competitive advantages to protect</li>
+      <li><strong>Deprioritize:</strong> Low I capabilities can be addressed later regardless of readiness</li>
+    </ol>
+  </div>
+  
+  <div class="ai-context" style="margin-top: 15px; padding: 15px; background: linear-gradient(135deg, #fce4ec 0%, #e0f7fa 100%); border-radius: 8px; border: 1px solid #ddd;">
+    <h3 style="font-size: 12px; color: #333; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+      <span style="background: #E6007E; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px;">AI LENS</span>
+      Connecting This Assessment to the Agentic Placemats
+    </h3>
+    <div style="display: table; width: 100%; font-size: 10px; color: #444; line-height: 1.5;">
+      <div style="display: table-row;">
+        <div style="display: table-cell; width: 50%; padding-right: 15px; vertical-align: top;">
+          <p style="margin-bottom: 8px;"><strong style="color: #E6007E;">Placemat 1: The Agentic O2C</strong></p>
+          <p style="margin-bottom: 6px;">Capabilities with <strong>High I + Low R</strong> in the <em>Invoice</em>, <em>Collect</em>, and <em>Recognize</em> phases are prime candidates for:</p>
+          <ul style="margin-left: 15px; margin-bottom: 8px;">
+            <li><strong>Developer Agents (NOW):</strong> Automate integration code for billing, rating, and revenue recognition</li>
+            <li><strong>Diagnostic Agents (6-12M):</strong> Proactive monitoring for dunning, collections, and compliance</li>
+            <li><strong>Orchestration Agents (12-24M):</strong> End-to-end remediation across Invoice → Collect → Recognize</li>
+          </ul>
+          <p style="font-style: italic; color: #666;">Ask: "Which of these gaps could an agent fix without a human ticket?"</p>
+        </div>
+        <div style="display: table-cell; width: 50%; padding-left: 15px; vertical-align: top; border-left: 1px solid #ccc;">
+          <p style="margin-bottom: 8px;"><strong style="color: #00A5A8;">Placemat 2: The Unified Growth Engine</strong></p>
+          <p style="margin-bottom: 6px;">Capabilities with <strong>High I + Low R</strong> in the <em>Quote & Sell</em>, <em>Learn</em>, and <em>Sustain & Grow</em> phases reveal PLG/SLG bridge opportunities:</p>
+          <ul style="margin-left: 15px; margin-bottom: 8px;">
+            <li><strong>Local Developer Tools (NOW):</strong> Unified catalog and pricing backbone across channels</li>
+            <li><strong>Remote Agent Server (6-12M):</strong> Same customer intelligence powering both PLG portals and SLG sales tools</li>
+            <li><strong>Predictive Agents (12-24M):</strong> Churn detection blending CDP usage data with CRM contract data</li>
+          </ul>
+          <p style="font-style: italic; color: #666;">Ask: "Does this gap exist because PLG and SLG use different systems?"</p>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #ccc; font-size: 10px; color: #555;">
+      <strong>Next Step:</strong> Circle your top 3 capabilities with High I + Low R. Map each to the agent timeline on the placemats. This becomes your AI readiness roadmap.
+    </div>
+  </div>
+
+</body>
+</html>

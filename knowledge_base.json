@@ -1,0 +1,1719 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2025-01",
+    "framework": "Recurring Revenue Management Lifecycle",
+    "source": "Zuora AI Agent and MCP Capability Documentation"
+  },
+  "mcp_overview": {
+    "description": "MCP (Model Context Protocol) acts as the 'USB for AI' that standardizes how agents safely interact with Zuora's catalog, pricing, usage, billing, revenue, and workflow services across the revenue lifecycle.",
+    "current_state": {
+      "developer_mcp": "Local server for catalog CRUD, pricing configuration, SDK codegen, and knowledge tools for Q&A guidance",
+      "remote_mcp_server": "Planned - exposes catalog, pricing, offer, billing, revenue tools to agents in Glean, Slack, and external LLMs under a single governed interface"
+    },
+    "mcp_gateway": "Single governed interface for partner and customer agents to discover and execute monetization operations. Enables PayPal checkout, Boomi agent iPaaS, and custom portal agents to interact with Zuora.",
+    "strategic_positioning": "MCP Server connects Zuora data and actions to AI agents, enabling intelligent automation across the order-to-revenue lifecycle"
+  },
+  "agent_inventory": {
+    "concierge_agents": [
+      {
+        "name": "Anantha Concierge",
+        "role": "Orchestrates domain-specific agents (Billing, Revenue, Collections, Orders, Customer Health) to deliver unified responses",
+        "capabilities": ["Multi-agent orchestration", "Huddle coordination", "Cross-domain reasoning"]
+      },
+      {
+        "name": "Zuora AI Concierge",
+        "role": "Customer-facing orchestration across billing, revenue, collections with persona-based routing",
+        "capabilities": ["Persona routing", "Unified customer view", "Cross-product guidance"]
+      }
+    ],
+    "business_agents": [
+      {
+        "name": "Billing Operations Agent",
+        "role": "Bill-run QA, subscription management, anomaly detection",
+        "capabilities": ["Pre/post QA checks on monthly bill runs", "Anomaly detection", "Reactivate suspended subscriptions", "Re-align billing", "Suspend access/billing based on triggers"]
+      },
+      {
+        "name": "Collections Manager Agent",
+        "role": "Automated collections, priority scoring, script generation",
+        "capabilities": ["Generate collection emails and call scripts", "Priority queue routing", "360° account view", "Auto-suggest next actions"]
+      },
+      {
+        "name": "Revenue Accountant Agent",
+        "role": "Data quality, reconciliation, revenue explanation",
+        "capabilities": ["Improve data quality", "Automate reconciliation", "Explain revenue behavior", "Spot issues early", "Resolve complexity faster"]
+      },
+      {
+        "name": "Revenue Manager Agent",
+        "role": "Audit prep, financial reporting, multi-year forecasting",
+        "capabilities": ["Audit Preparation", "Financial Reporting acceleration", "Multi-year forecasting", "GAAP vs Non-GAAP comparisons"]
+      },
+      {
+        "name": "Customer Success Agent",
+        "role": "Health monitoring, playbook execution, education",
+        "capabilities": ["Monitor health signals", "Drive adoption and expansion", "Educate at scale", "Trigger playbooks"]
+      },
+      {
+        "name": "Customer Health Agent",
+        "role": "Real-time churn risk monitoring and next-best-action recommendations",
+        "capabilities": ["Monitor subscriber signals in real time", "Flag churn risks", "Recommend next-best actions", "Preserve and grow recurring revenue"]
+      },
+      {
+        "name": "Churn Agent",
+        "role": "Behavioral pattern analysis around churn signals",
+        "capabilities": ["Analyze anomalies and behavioral patterns", "Detect churn signals", "Feed insights to retention workflows"]
+      },
+      {
+        "name": "Quote Agent / Deal Assist",
+        "role": "Alternative quote scenarios, deal scoring, guidance",
+        "capabilities": ["Create alternative quote scenarios", "Stay within financial and product boundaries", "Adapt to changing customer needs", "Handle ramps, amendments, renewals"]
+      }
+    ],
+    "functional_agents": [
+      {
+        "name": "Billing/Invoice Service Agent",
+        "role": "BFD, billing node, invoice diagnostics via Omni/Kibana",
+        "capabilities": ["BFD troubleshooting", "Billing node details", "Invoice issue diagnosis"]
+      },
+      {
+        "name": "Mediation/DACO Agent",
+        "role": "Data Connect and mediation troubleshooting",
+        "capabilities": ["Check mediation job status", "Inspect usage feeds", "Identify misconfigured sources", "Transform record validation"]
+      },
+      {
+        "name": "DQ/Trino Agent",
+        "role": "Data health checks, query execution, anomaly detection",
+        "capabilities": ["Health checks across data stores", "Query report execution", "Speedy diagnosis of rating/mediation issues"]
+      },
+      {
+        "name": "Data Management Agent",
+        "role": "Dynamic validation framework with real-time anomaly detection and adaptive checks",
+        "capabilities": ["Dynamic validation", "Real-time anomaly detection", "Adaptive thresholds", "Continuous audit readiness"]
+      },
+      {
+        "name": "RCA Agent",
+        "role": "Root cause analysis drafting with standardized templates",
+        "capabilities": ["Draft incident RCAs", "Use standardized templates", "Support compliance documentation"]
+      },
+      {
+        "name": "Notification AI Bot",
+        "role": "Autonomous alert recognition, impact analysis, remediation",
+        "capabilities": ["Alert recognition", "Impact analysis", "Remediation invocation", "Fix billing errors without human ticket"]
+      },
+      {
+        "name": "Workflow AI Bot",
+        "role": "Encapsulates multi-step playbooks as MCP tools for automated remediation",
+        "capabilities": ["Encapsulate order-to-bill playbooks", "Multi-step remediation automation", "MCP tool exposure"]
+      }
+    ],
+    "specialized_agents": [
+      {
+        "name": "Outcomes Simulation Agent",
+        "role": "What-if simulations for plans, revenue/margin projections",
+        "capabilities": ["AI-driven what-if simulations", "Plan comparison overlay", "AI recommendations for price points/tiers", "Experimentation support with cohort analysis"]
+      },
+      {
+        "name": "Revenue Narrator",
+        "role": "Plain-language explanations of contract changes and revenue impacts with audit trail links",
+        "capabilities": ["Explain revenue changes in natural language", "Link to audit trails", "Period-over-period explanations"]
+      },
+      {
+        "name": "SSP Analyzer",
+        "role": "Standalone selling price analysis for revenue recognition",
+        "capabilities": ["SSP analysis", "Revenue allocation support"]
+      },
+      {
+        "name": "Query Assistant",
+        "role": "Natural language queries with auto-generated, validated SQL",
+        "capabilities": ["Natural language to SQL", "Query validation", "Ad-hoc revenue analysis"]
+      },
+      {
+        "name": "Reconciliation AI",
+        "role": "Automated subledger to ERP/GL reconciliation",
+        "capabilities": ["Automate data reconciliation", "Reduce manual tie-outs", "Variance identification"]
+      },
+      {
+        "name": "DataFix AI",
+        "role": "Diagnose data issues and auto-execute low-risk fixes based on historical tickets",
+        "capabilities": ["Diagnose data issues", "Recommend fixes", "Auto-execute low-risk fixes", "Learn from historical tickets"]
+      }
+    ]
+  },
+  "phases": [
+    {
+      "id": "configure_price",
+      "name": "Configure and Price",
+      "color": "#2E7D32",
+      "agentic_goal": "AI-optimized monetization",
+      "key_question": "Is our pricing driven by AI simulation and optimization?",
+      "strategy_context": "Move from static, hand-coded catalog and pricing setups to an Agentic Monetization Platform where specialist agents (pricing, catalog, revenue, channel) handle configuration and optimization work. MCP acts as the 'USB for AI' standardizing how agents safely talk to Zuora's catalog, pricing, usage, and workflow services.",
+      "capabilities": [
+        {
+          "id": "offer_catalog_management",
+          "name": "Offer/Catalog Management",
+          "subtitle": "Price, Usage, Promo",
+          "row": 1,
+          "col": 1,
+          "why_it_matters": "Catalog, bundles, and offers are the epicenter of Total Monetization, touching almost every Zuora service and channel. Today, many customers still suffer from SKU sprawl, fragmented offer logic, and duplication across CPQ, storefronts, and billing, which slows launches and complicates experimentation.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Monetization Catalog & Offer Management provides a unified catalog for products, plans, bundles, and promotions with dynamic and attribute-based promotions and offers",
+              "Offer creation, management, cloning, and templates for business users",
+              "Dynamic, attribute-based promotions driven by customer, lifecycle, channel, and other context attributes"
+            ],
+            "ai_agents": [
+              "Developer MCP tools for catalog Q&A and setup guidance (Ask_Zuora style)"
+            ],
+            "mcp_tools": [
+              "Ingest & manage catalog",
+              "Create & manage product pricing / plans / rules",
+              "Managing product catalog (products, rate plans, charges)",
+              "Complex pricing structures (tiered, volume, overage, multi-attribute)",
+              "Guide product managers through catalog and pricing setup"
+            ]
+          },
+          "how_it_works_today": "MCP tools encapsulate catalog operations (create product, define charges, configure pricing) behind a consistent schema. An AI agent interprets natural language like 'create a Pro plan with tiered usage and overage', calls MCP tools to generate payloads, validate pricing, and execute catalog changes. Uses knowledge tools to pull docs and examples for product managers. Can run locally via zuora-mcp for developers and internal product teams.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Full 'Intelligent Commerce': GA of Intelligent Merchandising and Promotions Management unifying catalog, price, promotions, and merchandising with AI-powered offer optimization",
+              "AI-driven suggestion of new packages and bundles for segments, powered by usage and performance data",
+              "Integration of Business Context Service / Adaptive Context Service so agents can automatically tailor offers by GTM structure, channel, site, and customer history",
+              "Remote MCP Server / MCP Gateway enabling customers and partners to integrate Zuora into their own LLMs and agents"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Developer MCP"],
+            "supporting_agents": ["Anantha Concierge"]
+          }
+        },
+        {
+          "id": "price_management",
+          "name": "Price Management",
+          "subtitle": "",
+          "row": 2,
+          "col": 1,
+          "why_it_matters": "Customers want to innovate pricing models (usage, hybrid, commitments) without exploding SKUs or hard-coding rules in each channel. Pain points include rigid discounting and promotions, manual one-size-fits-all pricing, and high engineering cost to change price books.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Dynamic and Attribute-Based Pricing using real-time business context (buyer segment, current subscriptions, site/catalog, channel, product context, and arbitrary attributes) to compute optimal prices",
+              "AI-powered pricing & offer management as a core pillar of Commerce strategy"
+            ],
+            "ai_agents": [
+              "Developer MCP for pricing configuration"
+            ],
+            "mcp_tools": [
+              "Configure all pricing charge types (flat, per-unit, tiered, volume, overage, high-watermark, multi-attribute)",
+              "Generate example payloads and SDK code in multiple languages",
+              "Read existing charge structures and tiers for a plan",
+              "Propose standardized patterns",
+              "Draft and execute payloads to standardize pricing"
+            ]
+          },
+          "how_it_works_today": "An AI agent via MCP can read existing charge structures and tiers for a plan, propose standardized patterns (e.g., 'convert all these bespoke overrides into a multi-attribute formula'), and draft and execute payloads to standardize pricing across regions or products, while keeping human approval in the loop.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Rules Engine + Merchandising rules: Introduction of a Rules Engine (rule builder and templates) and merchandising rules as natural 'homes' for AI-authored and AI-optimized pricing policies",
+              "Soft bundles and advanced policies (top-up, overage, rollover) governed consistently, enabling AI agents to reason across full price waterfalls",
+              "Insights-driven optimization: Price/Profit Optimization in Learn phase giving agents optimization targets (margin, growth, retention) to refine pricing rules over time"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Developer MCP", "Outcomes Simulation Agent"],
+            "supporting_agents": ["Anantha Concierge"]
+          }
+        },
+        {
+          "id": "revenue_planning",
+          "name": "Revenue Planning",
+          "subtitle": "",
+          "row": 3,
+          "col": 1,
+          "why_it_matters": "Pricing and catalog changes are often made without a forward-looking financial view, leading to missed revenue targets, over- or under-monetized usage-based plans, and difficulty justifying changes to Finance and the board.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Zuora Outcomes Simulation Agent runs AI-driven 'what-if' simulations on any plan, especially usage-based ones",
+              "Projects billing, revenue, and margin curves before changes go live",
+              "Plan comparison - overlay multiple candidate plans and compare projected outcomes side-by-side",
+              "AI recommendations - propose price points, tiers, and overage caps most likely to maximize revenue and minimize churn",
+              "Experimentation support - tag customers, meters, and plans for cohort analysis and iterative testing"
+            ],
+            "ai_agents": [
+              "Outcomes Simulation Agent (flagship capability)"
+            ],
+            "mcp_tools": [
+              "Pull plan and usage definitions from catalog and usage services via MCP",
+              "Apply scenario assumptions (volume growth, price change, tier boundary shifts)",
+              "Compute projected billing and revenue curves",
+              "Return visualizable data plus plain-language explanations"
+            ]
+          },
+          "how_it_works_today": "The Outcomes Simulation Agent pulls plan and usage definitions from catalog and usage services via MCP, applies scenario assumptions, computes projected billing and revenue curves and returns them as visualizable data plus plain-language explanations. This moves pricing from backward-looking analytics to forward-looking 'what if' simulation, replacing guesswork with hard numbers.",
+          "whats_coming": {
+            "timeline": "12-24M",
+            "capabilities": [
+              "Deeper integration with Revenue and Finance Intelligence: Tighter linkage between simulations and Revenue Manager Agent and Finance Intelligence so planned catalog changes can be evaluated against revenue recognition and margin targets",
+              "Lifecycle-aware planning: Use context (segment, channel, lifecycle stage) and Learn-phase signals (churn, expansion) to feed richer assumptions into simulations",
+              "Moving toward autonomous 'AI-optimized monetization' across entry, profit, and retention"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Outcomes Simulation Agent"],
+            "supporting_agents": ["Revenue Manager Agent"]
+          }
+        },
+        {
+          "id": "incentive_management",
+          "name": "Incentive Management",
+          "subtitle": "Rebates, Discounts",
+          "row": 4,
+          "col": 1,
+          "why_it_matters": "Today, many customers run promotions and rebates manually or in external tools, struggle to target incentives by lifecycle stage, channel, or behavior, and have limited feedback loops to know which discounts actually drive profitable growth.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Offer Management and Promotion Management provide a flexible promotion model with dynamic, attribute-based offers incorporating any attribute: buyer segment, current subscriptions, site/catalog, channel",
+              "Stacking, exclusion, conditions, and templates so business users (not developers) can control incentive logic",
+              "Unifying pricing, packaging, and offers augmented by AI to holistically optimize for business outcomes"
+            ],
+            "ai_agents": [
+              "Developer MCP for offer configuration"
+            ],
+            "mcp_tools": [
+              "Propose incentive structures (trial discounts, lifecycle triggers, volume rebates)",
+              "Automatically configure corresponding offers and rules in Zuora via MCP",
+              "Validate eligibility and simulate financial impact using same pricing and usage context",
+              "Read current promotions and discount rules",
+              "Analyze performance (redemptions, churn impact) through DQ/insights agents"
+            ]
+          },
+          "how_it_works_today": "An AI agent can read current promotions via MCP, analyze performance through connected data platforms and DQ/insights agents, recommend changes (e.g., phase-out low-ROI discounts, increase incentive for segments with high LTV) and push updated offers, subject to human approval.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "More intelligent incentive targeting: Tighter tie-in between churn insights, customer value intelligence, and promotion rules to enable AI-driven 'next best incentive' based on behavior and risk",
+              "MCP-exposed incentive APIs for partners: Via the MCP Gateway, partners (e.g., marketing platforms, commerce front-ends) can let their own agents request and apply optimal incentives per customer and channel, using Zuora as the policy and accounting system of record"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Developer MCP"],
+            "supporting_agents": ["Churn Agent", "Customer Health Agent"]
+          }
+        },
+        {
+          "id": "channel_management",
+          "name": "Channel Management",
+          "subtitle": "",
+          "row": 5,
+          "col": 1,
+          "why_it_matters": "Enterprises increasingly sell through multiple channels: own storefronts, CPQ, partner portals, marketplaces, and now AI-led channels (chatbots, agents). Without a unified context layer: pricing and offers fragment by channel, partners get inconsistent incentives, and analytics on channel performance are siloed.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Context-aware, omnichannel compare/configure/transact/manage experiences powered by Business Context Service / Adaptive Context Service",
+              "Resolves operating structure, location, channel, account/contracts, and session details into simple attributes for product recommendations, pricing, merchandising, and configuration",
+              "Zuora's Commerce Foundation powers packaging, pricing, eligibility, and offers across every channel—self-serve, Zephr, storefronts, CPQ, and agents—using one unified set of context, catalog, and decision services"
+            ],
+            "ai_agents": [
+              "Channel/partner agents using unified context"
+            ],
+            "mcp_tools": [
+              "MCP Server positioned to connect Zuora data and actions to AI agents across indirect channels",
+              "MCP Gateway ensures one AI port for monetization logic rather than bespoke integrations",
+              "Call context services to resolve channel, site, and customer attributes",
+              "Use catalog and offer APIs to render appropriate assortments and pricing"
+            ]
+          },
+          "how_it_works_today": "Channel or partner experiences (e.g., Zephr, self-serve storefronts) can call context services to resolve channel, site, and customer attributes, use catalog and offer APIs to render appropriate assortments and pricing, and use early MCP-enabled tools so agents embedded in these channels can fetch product data, pricing, and offers consistently.",
+          "whats_coming": {
+            "timeline": "12-24M",
+            "capabilities": [
+              "Agent-led channels 'from day one': Strategy explicitly calls out sales-led, customer-led, and AI agent-led monetization flows—meaning indirect and automated channels will be first-class citizens for catalog, pricing, and offer execution",
+              "Partner / channel intelligence: In the Learn stage, Partner/Channel Intelligence and benchmarks feeding back performance data so AI agents can optimize which offers and prices to push via which channels",
+              "External agents via MCP for partners: Partners can host their own agents that discover eligible products and bundles, compute channel-specific pricing and incentives, and initiate orders into Zuora—while still governed centrally by Zuora policies"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Developer MCP", "Anantha Concierge"],
+            "supporting_agents": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "quote_sell",
+      "name": "Quote and Sell",
+      "color": "#1565C0",
+      "agentic_goal": "Agentic, omnichannel quoting",
+      "key_question": "Can any channel create a quote using the same CPQ brain?",
+      "strategy_context": "Make quoting agentic and omnichannel. NextGen Zuora CPQ is being built as an AI-first, MCP-compliant CPQ where sales reps, partners, and even customers can 'quote anywhere' (CRM, portals, AI agents) against a single catalog, pricing, and contract brain. MCP is the standard way those agents call catalog, pricing, quote, and order services.",
+      "capabilities": [
+        {
+          "id": "opportunity_capture",
+          "name": "Opportunity Capture",
+          "subtitle": "eCommerce, CRM, Partners",
+          "row": 1,
+          "col": 2,
+          "why_it_matters": "Today, opportunity → quote flows are often brittle: tightly coupled to one CRM, manually re-keyed from eCommerce, or disconnected from partner channels. We want a world where any channel (Salesforce, Dynamics, HubSpot, storefront, partner marketplace, AI agent) can initiate a quote using the same CPQ brain, without re-implementing rules.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "CPQ 'quote anywhere' architecture: NextGen CPQ can run quoting logic independently of any single CRM, with CRM-agnostic APIs for opportunity/quote sync",
+              "Late-bound price evaluation so pricing and configuration are resolved at quote time from real-time catalog and context",
+              "Quote gen from prompt and files and AI Assist – Pre-Quote allow starting from unstructured RFP/spec to draft a quote skeleton",
+              "Account Insights give AI-driven account context to drive quote structure and opportunity strategy",
+              "Auto-gen Renewal Quotes and mix quotes (new, amend, renew) connect billing/subscription history back into the selling motion"
+            ],
+            "ai_agents": [
+              "Quote Agent",
+              "Account Insights"
+            ],
+            "mcp_tools": [
+              "Pull pricing rules (GET /catalog/price-rules)",
+              "Fetch and mutate quotes (GET /quote/{id}, PATCH /quote, POST /order)",
+              "Simulate and execute end-to-end quote-to-order flows from an opportunity",
+              "Read opportunity context (segment, region, ARR target, existing subs)",
+              "Propose a quote including dynamic pricing and bundles"
+            ]
+          },
+          "how_it_works_today": "CRM/eCommerce surfaces sync opportunities and quote IDs with CPQ. An AI quote agent (running via MCP server) can read opportunity context (segment, region, ARR target, existing subs), call MCP tools to propose a quote, including dynamic pricing and bundles, and hand the draft back into CPQ for human review and approval.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Full 'Quote Anywhere' LLM-layer: JSON-based quote definition language specifically designed to be LLM-generatable ('Quote for 500 Enterprise users in APAC with a 3-year ramp')",
+              "CRM/eCommerce/partner agents creating and adjusting quotes via this declarative spec",
+              "Richer data fusion at opportunity time: Deeper integration of revenue/collections insights (from billing, rev rec, and cash) into CPQ rules and AI scoring"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Quote Agent / Deal Assist"],
+            "supporting_agents": ["Account Insights", "Revenue agents"]
+          }
+        },
+        {
+          "id": "customer_partner_portals",
+          "name": "Customer and Partner Portals",
+          "subtitle": "",
+          "row": 2,
+          "col": 2,
+          "why_it_matters": "Growth motions increasingly start in self-serve (customer portals, storefronts, partner marketplaces), not just direct sales. Historically, self-serve portals and CPQ used different product/price logic, causing inconsistent offers and manual reconciliation.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Hosted Checkout, Embedded Checkout, Self-Serve Portal for subscription management, payments, and self-service changes",
+              "Widget libraries for embedding customer experiences (product detail pages, portal elements) into customer-owned sites",
+              "Z-CPQ Portal with widgets for partners and internal reps, integrated with CRMs like Salesforce",
+              "Partner Portal & disti widgets for VAR/distributor reps to create solution price requests (SPR) and quotes"
+            ],
+            "ai_agents": [
+              "Customer-facing agents in portals",
+              "Partner agents"
+            ],
+            "mcp_tools": [
+              "Read usage, entitlements, and current subscriptions",
+              "Recommend upgrades/add-ons and create a quote request",
+              "Build an SPR, apply rules and discounts, and hand to provider's CPQ for finalization"
+            ]
+          },
+          "how_it_works_today": "Portal and partner widgets rely on the same catalog and CPQ services that are being MCP-enabled. A customer-facing agent in a portal can read usage, entitlements, and current subscriptions, recommend upgrades/add-ons and create a quote request. A partner agent can build an SPR, apply rules and discounts, and hand it to the provider's CPQ for finalization.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Omnichannel, AI-ready experiences: Strategy explicitly calls out omnichannel commerce APIs and embeddable experiences so self-serve, Zephr, storefronts, CPQ, and agents all share the same context, catalog, and decision services",
+              "AI-augmented self-serve quoting: Self-serve users will get AI-guided 'quote request → assisted quote' flows (Quote Request self2assisted, guided product discovery), using the same agents that help sales reps in CPQ"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Customer Portal Agent", "Partner Agent"],
+            "supporting_agents": ["Quote Agent"]
+          }
+        },
+        {
+          "id": "guided_selling",
+          "name": "Guided Selling",
+          "subtitle": "CPQ, Price Guidance",
+          "row": 3,
+          "col": 2,
+          "why_it_matters": "Complex subscription deals involve many product combinations, ramps, and commitments, non-obvious margin and rev-rec implications, and frequent back-and-forth with the customer. Reps and partners need guided, policy-aware quoting, not just a big grid of SKUs.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Guided Selling: Product Discovery - Questionnaire-style guided selling that recommends and pre-filters products in the catalog for a given solution with AI-first question generation",
+              "Deal Assist / Deal Sense agent creates alternative quote scenarios, staying within financial and product boundaries",
+              "Smart Guided Selling and NLP-based quote generation dynamically adapts discovery and quoting paths in real time",
+              "Surfaces recommendations like 'The combination of Product A + Feature X has a 60% rejection rate, consider Feature Y instead' or 'Your quote is 18% above average for similar deals in this vertical'",
+              "Dynamic Pricing in CPQ uses account, opportunity, and quote context to drive product, rate plan, and charge pricing",
+              "Visualization of Deal Score, margin, rev rec, and account metrics to give guided selling financial guardrails"
+            ],
+            "ai_agents": [
+              "Deal Assist / Deal Sense Agent",
+              "Quote Agent"
+            ],
+            "mcp_tools": [
+              "Pull configuration rules and price rules",
+              "Simulate quote alternatives and validate policy compliance before presenting options"
+            ]
+          },
+          "how_it_works_today": "AI Deal Assist agent creates alternative quote scenarios, staying within financial and product boundaries, and helping reps adapt to changing customer needs (ramps, amendments, renewals) over time. Smart Guided Selling dynamically adapts discovery and quoting paths in real time.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Deeper 'agent-in-the-loop' selling: Quote agents that continuously score the deal (win likelihood, margin, risk), suggest moves (change term, adjust bundle, swap product) in conversational form",
+              "Tighter integration with Learn & Optimize: Guided selling success/failure data feeding back into offer and price optimization, so the agent learns which bundles, incentives, and price points work for which segments and channels"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Deal Assist / Deal Sense Agent"],
+            "supporting_agents": ["Quote Agent", "Revenue Manager Agent"]
+          }
+        },
+        {
+          "id": "customer_risk_fraud",
+          "name": "Customer Risk and Fraud Check",
+          "subtitle": "",
+          "row": 4,
+          "col": 2,
+          "why_it_matters": "High-value B2B deals carry both credit risk (likelihood of non-payment/delinquency) and fraud/identity risk (illegitimate buyers, abusive behavior). If we can surface risk at quote time, sales and finance can adjust terms (prepayment, deposits, caps) before committing.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Customer Risk & Fraud Check listed as AI use case in Quote & Sell (IDC research with Zuora)",
+              "Risk indicator score (1–10) evaluating quotes on: Legal T&Cs text, Customer payment history, Similar customers in same vertical/region, Quote complexity and delays, Delivery issues on similar past deals",
+              "AI-first handling: using AI to analyze these factors and explain the risk"
+            ],
+            "ai_agents": [
+              "Risk scoring agents (design stage)"
+            ],
+            "mcp_tools": [
+              "Consume billing/collections history and contract metadata via MCP",
+              "Contribute features for risk scoring"
+            ]
+          },
+          "how_it_works_today": "This is early/design-stage. No GA 'fraud engine' but requirements have established the risk score is part of CPQ's decisioning. AI agents can consume billing/collections history and contract metadata (via MCP & DQ/insight tools) to contribute to that score.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "AI-driven risk gating in CPQ: Integrate quote risk scores into approval rules (deals above risk threshold require finance/legal approval)",
+              "Guided selling suggesting adjusted terms for high-risk deals",
+              "Integration with external fraud/credit engines via MCP Gateway"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Risk Scoring Agent"],
+            "supporting_agents": ["Collections Manager Agent", "Quote Agent"]
+          }
+        },
+        {
+          "id": "contract_management",
+          "name": "Contract Management",
+          "subtitle": "",
+          "row": 5,
+          "col": 2,
+          "why_it_matters": "Complex subscription contracts span multiple years with amendments, renewals, and commitments. Manual contract management creates audit gaps and slows deal velocity.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "CPQ contract lifecycle management",
+              "Quote-to-contract-to-order flows"
+            ],
+            "ai_agents": [
+              "Quote Agent for contract context"
+            ],
+            "mcp_tools": [
+              "Read current subscriptions and contracts",
+              "Generate proposed quotes including amendments"
+            ]
+          },
+          "how_it_works_today": "CPQ manages contract state. AI agents can read contract context via MCP to inform quoting and renewal strategies.",
+          "whats_coming": {
+            "timeline": "12-24M",
+            "capabilities": [
+              "AI-assisted contract analysis and amendment suggestions",
+              "Automated contract compliance checking",
+              "Natural language contract querying"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Quote Agent"],
+            "supporting_agents": ["Revenue Manager Agent"]
+          }
+        },
+        {
+          "id": "inventory_ship_availability",
+          "name": "Inventory/Ship Availability",
+          "subtitle": "",
+          "row": 6,
+          "col": 2,
+          "why_it_matters": "For hybrid XaaS businesses (physical + digital + services), quoting must respect inventory pools and availability dates, and reflect realistic ship/activation timelines. Historically, this logic often lives outside of Zuora, making it hard for AI-driven quoting to know what can actually be delivered, when.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Inventory: Visibility, Pools, Management as part of Commerce Management Services",
+              "Fulfillment and Ship in Provision, tied to entitlement and deployment"
+            ],
+            "ai_agents": [
+              "Quoting agents with availability awareness"
+            ],
+            "mcp_tools": [
+              "Query stock levels, pools, and locations for the requested configuration",
+              "Estimate ship or activation windows and present them in the quote",
+              "Adjust offers or channels when a given SKU/pool is constrained"
+            ]
+          },
+          "how_it_works_today": "Inventory and fulfillment services form the basis for exposing availability and pool data to CPQ and agents. As these services are MCP-wrapped, quoting agents will be able to query availability and present realistic timelines.",
+          "whats_coming": {
+            "timeline": "12-24M",
+            "capabilities": [
+              "Quote-aware availability: Tighter integration between Order State Management, Inventory Management, and CPQ",
+              "AI-guided configuration and dynamic pricing factoring in availability and fulfillment costs",
+              "Channel agents (partner portals, marketplaces) only offering what's actually fulfillable in their region/inventory pools"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Quote Agent"],
+            "supporting_agents": ["Fulfillment Agent"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "invoice",
+      "name": "Invoice",
+      "color": "#7B1FA2",
+      "agentic_goal": "Self-healing billing flows",
+      "key_question": "How many invoicing errors were flagged and fixed by an agent today?",
+      "strategy_context": "Move from manual, ticket-driven billing ops to self-healing billing flows. MCP is the 'USB for AI' that lets agents safely access billing, invoicing, rating, mediation, and data-quality tools across tenants. Specialist agents include Billing/Invoice Service Agents, Mediation/DACO Agents, DQ/Trino Agent, Data Management Agent, Notification AI Bot, and Billing Operations Agent.",
+      "capabilities": [
+        {
+          "id": "order_management",
+          "name": "Order Management",
+          "subtitle": "",
+          "row": 1,
+          "col": 3,
+          "why_it_matters": "Order data (from CPQ, portals, partners) is the source of truth for what should be billed. Historically, order orchestration is spread across CRMs, custom middleware, and Zuora, making it hard for AI to reason about 'what should have happened vs what did' when invoices are wrong.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Extensible, callable & composable components (proration/rating, bill run, order orchestration) as part of a unified business process framework",
+              "Core processes (Billing, Invoicing, Renewals) refactored for self-service/partner extensibility and AI/agent extensibility"
+            ],
+            "ai_agents": [
+              "Billing Operations Agent works against the order–invoice chain, checking bill-run quality and subscription state",
+              "Invoice Service Agent and Billing Agent aligned to 'Invoice & Collect… troubleshooting leakage'",
+              "Workflow AI Bot encapsulates typical order-to-bill playbooks as MCP tools"
+            ],
+            "mcp_tools": [
+              "Inspect orders, invoices, subscriptions as a coherent graph",
+              "Trigger order-driven workflows (re-apply an order impact, replay an orchestration step)",
+              "Fix downstream billing issues"
+            ]
+          },
+          "how_it_works_today": "For now, agents are primarily diagnostic/assistive. Billing/Invoice Agent can analyze a problematic customer and say: 'This invoice mismatch stems from Order X not fully applied to Subscription Y; here's the recommended fix.' The Workflow AI Bot concept encapsulates typical order-to-bill playbooks as MCP tools, automating multi-step remediation.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Composable order-to-bill agents: Standard MCP tools for order orchestration (create/amend order, re-orchestrate, re-align billing schedule)",
+              "Billing Ops Agents can go beyond diagnosis and execute fixes safely",
+              "Customer-facing agents can simulate order impacts on future invoices before changes are committed",
+              "Tighter CPQ–Billing coupling via MCP: Same agent can see how quote was structured, how orders were created, how billing executed—closing the loop for autonomous corrections"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Billing Operations Agent"],
+            "supporting_agents": ["Invoice Service Agent", "Workflow AI Bot"]
+          }
+        },
+        {
+          "id": "billing_invoice",
+          "name": "Billing, Invoice",
+          "subtitle": "",
+          "row": 2,
+          "col": 3,
+          "why_it_matters": "Billing operations teams are under pressure to run large, complex bill runs reliably, avoid errors that trigger disputes and re-runs, and explain variance quickly to customers and finance.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Unified Data Platform & Reporting: Single workspace across Commerce + Billing + AR + Revenue powering both human and AI agent operations",
+              "Real-time bill forecasting and simulations to predict invoice volumes and anticipate cash flows and exceptions"
+            ],
+            "ai_agents": [
+              "Billing/Invoice Service Agents: Focus on BFD, billing node details, and invoicing issues via Omni/Kibana",
+              "Billing Operations Agent: Pre/post QA checks on monthly bill runs with anomaly detection, reactivate suspended subscriptions, suspend access/billing based on triggers",
+              "Notification AI Bot: Autonomous alert recognition, impact analysis, and remediation—key to systems that 'fix their own billing errors without a human ticket'"
+            ],
+            "mcp_tools": [
+              "Remote MCP Server for billing agents in Glean/Slack/Co-pilot to call bill run, invoice, and journal APIs",
+              "External MCP-compatible agents (customer or partner bots) can use Zuora's billing logic safely"
+            ]
+          },
+          "how_it_works_today": "A typical flow: Billing Ops Agent reviews a planned bill run → runs pre-run QA with anomaly checks → flags suspicious spikes/voids. If errors occur, Notification AI Bot ingests alerts, summarizes impact ('X customers affected; invoices Y–Z wrong'), and invokes standard playbooks (pause, fix data, re-bill).",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "More proactive and autonomous billing: Scaling agents from 'assist' to 'self-healing'—auto-skip obviously corrupted batches, suggest or perform targeted re-billing with full audit trails",
+              "Bill explanations on demand: For CS and finance, agents that can narrate why an invoice changed in plain language (similar to Revenue Narrator), saving 20+ minutes per customer email"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Billing Operations Agent", "Notification AI Bot"],
+            "supporting_agents": ["Billing/Invoice Service Agents"]
+          }
+        },
+        {
+          "id": "rating_charging",
+          "name": "Rating and Charging",
+          "subtitle": "",
+          "row": 3,
+          "col": 3,
+          "why_it_matters": "Complex rating (commitments, tiers, FX, multi-entity) is where revenue leakage often hides. As usage and pricing models get more granular, manual configuration and debugging of rating flows doesn't scale.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Callable rating components: 'proration/rating' as extensible, callable, composable components exposed for AI and workflow reuse",
+              "Dynamic & attribute-based pricing from Configure & Price flows directly into rating with real-time business and customer context"
+            ],
+            "ai_agents": [
+              "Mediation/DACO Agents fix rating/mediation issues that cause downstream rating failures",
+              "DQ/Trino Agent runs health checks and query reports across underlying rating data stores"
+            ],
+            "mcp_tools": [
+              "Developer MCP + knowledge tools help set up complex rating/charge models correctly",
+              "Identify rating failures or skewed data before or after bill runs"
+            ]
+          },
+          "how_it_works_today": "Today, AI is mainly in configuration & troubleshooting. Developer MCP + knowledge tools help set up complex rating/charge models correctly. Mediation/DACO and DQ agents identify rating failures or skewed data before or after bill runs.",
+          "whats_coming": {
+            "timeline": "12-24M",
+            "capabilities": [
+              "AI-assisted rating optimization: As Usage Anomaly Detection and billing forecasting mature, agents will recommend different rating strategies (e.g., accrual vs billing-based, different tier breakpoints) for specific segments",
+              "Composable rating via MCP: Standard MCP tools for rating (simulate rating for a given account/meter/time range) will let agents test rating changes before deployment and help GS/partners adopt new rating models faster ('AI-driven implementation')"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Mediation/DACO Agent"],
+            "supporting_agents": ["DQ/Trino Agent", "Developer MCP"]
+          }
+        },
+        {
+          "id": "usage_data_mediation",
+          "name": "Usage Data Mediation",
+          "subtitle": "",
+          "row": 4,
+          "col": 3,
+          "why_it_matters": "For usage/consumption models, garbage in = garbage out. Bad or late mediation leads to mis-rating, bill-run delays, disputes, and revenue restatements. Mediation is often one of the most complex, least visible parts of the stack.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Telco-grade mediation, metering and rating",
+              "Mediation capabilities improving integration with Zuora billing with basic AI capabilities"
+            ],
+            "ai_agents": [
+              "Mediation/DACO Agents: Functional specialists responsible for Data Connect and Mediation troubleshooting",
+              "Anantha Concierge and Zuora AI Concierge orchestrate Mediation Agents together with Billing and DB agents"
+            ],
+            "mcp_tools": [
+              "Check if mediation jobs ran as expected",
+              "Inspect sample usage feeds and transformed records",
+              "Point SREs to misconfigured sources or mappings faster than manual log-hunting"
+            ]
+          },
+          "how_it_works_today": "Agents can check if mediation jobs ran as expected, inspect sample usage feeds and transformed records, and point SREs to misconfigured sources or mappings faster than manual log-hunting.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "AI-driven mediation health & mapping: Usage anomaly detection plus AI-assisted mapping from raw feeds to standardized meters, reducing GS effort in implementations",
+              "MCP-exposed mediation tools: Mediation pipelines exposed as MCP tools for both internal and partner agents (e.g., a partner's data-prep agent validating feeds before sending to Zuora)"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Mediation/DACO Agent"],
+            "supporting_agents": ["Anantha Concierge", "DQ/Trino Agent"]
+          }
+        },
+        {
+          "id": "anomaly_detection",
+          "name": "Anomaly Detection",
+          "subtitle": "",
+          "row": 5,
+          "col": 3,
+          "why_it_matters": "Without automation, teams catch anomalies only when customers complain or finance spots variance. At scale, manual review of invoices, usage, and rating logs is impossible.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Usage anomaly detection",
+              "Dynamic validation framework with real-time anomaly detection and adaptive checks"
+            ],
+            "ai_agents": [
+              "DQ/Trino Agent: Runs health checks and query reports across data stores",
+              "Data Management Agent: Dynamic validation framework for transaction data with real-time anomaly detection and adaptive checks",
+              "Notification AI Bot: Handles alert recognition and remediation"
+            ],
+            "mcp_tools": [
+              "Health checks and query reports across underlying data stores",
+              "Adaptive thresholds for anomaly detection",
+              "Speeding diagnosis when rating jobs go wrong"
+            ]
+          },
+          "how_it_works_today": "DQ/Trino Agent runs health checks and query reports. Data Management Agent provides dynamic validation with real-time anomaly detection and adaptive checks. Notification AI Bot handles alerts.",
+          "whats_coming": {
+            "timeline": "NOW-6M",
+            "capabilities": [
+              "Proactive anomaly detection before bill runs",
+              "Auto-flagging with recommended corrections",
+              "Integration with billing forecasting for predictive alerts"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["DQ/Trino Agent", "Data Management Agent"],
+            "supporting_agents": ["Notification AI Bot", "Billing Operations Agent"]
+          }
+        },
+        {
+          "id": "dispute_prediction",
+          "name": "Dispute Prediction",
+          "subtitle": "",
+          "row": 6,
+          "col": 3,
+          "why_it_matters": "Identifying likely billing conflicts before they occur prevents customer escalations and reduces collections burden.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Billing and payment history analysis",
+              "Pattern recognition in dispute history"
+            ],
+            "ai_agents": [
+              "DQ/Trino Agent",
+              "Collections Manager Agent"
+            ],
+            "mcp_tools": [
+              "Analyze billing patterns for dispute likelihood",
+              "Connect dispute history to invoice characteristics"
+            ]
+          },
+          "how_it_works_today": "Early stage. Agents can analyze billing patterns and dispute history to flag high-risk invoices.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Predictive dispute scoring on invoices before sending",
+              "Proactive outreach for high-risk invoices",
+              "Integration with collections for softer early engagement"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["DQ/Trino Agent"],
+            "supporting_agents": ["Collections Manager Agent", "Notification AI Bot"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "collect",
+      "name": "Collect",
+      "color": "#00838F",
+      "agentic_goal": "Autonomous payment recovery",
+      "key_question": "Are failed payments being remediated by a bot before a human is alerted?",
+      "strategy_context": "Move from manual collections workflows to AI-driven prioritization, personalized outreach, and autonomous remediation. Key agents include Collections Manager Agent, Notification AI Bot, and Customer Health Agent.",
+      "capabilities": [
+        {
+          "id": "payment_routing",
+          "name": "Payment and Routing",
+          "subtitle": "",
+          "row": 1,
+          "col": 4,
+          "why_it_matters": "Handling transaction flows efficiently across payment methods, currencies, and regions is foundational to cash collection.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Multi-method, multi-currency payment processing",
+              "Smart routing capabilities"
+            ],
+            "ai_agents": [
+              "Collections agents with payment context"
+            ],
+            "mcp_tools": [
+              "Payment method management",
+              "Transaction routing optimization"
+            ]
+          },
+          "how_it_works_today": "Payment infrastructure handles routing. Early AI work focuses on optimizing route selection based on success rates.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "AI-driven optimal route and retry strategy selection per customer, balancing cost and success probability",
+              "MCP exposure for customer-facing bots to retrieve invoice + payment status and trigger safe payment actions (retries, method updates) under policy"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Collections Manager Agent"],
+            "supporting_agents": ["Notification AI Bot"]
+          }
+        },
+        {
+          "id": "customer_credit_management",
+          "name": "Customer Credit Management",
+          "subtitle": "",
+          "row": 2,
+          "col": 4,
+          "why_it_matters": "Poor visibility into credit risk leads to over-extended customers and rising bad debt, or overly conservative terms that slow growth. Credit signals sit across billing, payments, disputes, and collections, making them hard to operationalize without AI.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Customer Credit Management as a core recurring-revenue capability in Collect stage",
+              "IDC Collect AI use cases: GenAI + Predictive AI analyze customer communications and billing situation, sort customers into automated vs high-touch actions based on likelihood to pay",
+              "Unified reporting and forecasting across billing + payments providing normalized data for payment history, DSOs, aging, dispute patterns, contract structures"
+            ],
+            "ai_agents": [
+              "Collections agents with credit context"
+            ],
+            "mcp_tools": [
+              "Analyze customer communications and billing situation",
+              "Sort customers into automated vs high-touch actions"
+            ]
+          },
+          "how_it_works_today": "Credit management is partially automated via Collections and AR modules that track delinquencies and payment behavior. Early AI/agent work focuses on which customers to prioritize (collections queues informed by payment probability).",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Credit-aware agents in Collect: Compute credit risk scores using billing + payment history + disputes",
+              "Feed those scores into dunning strategies, payment terms suggestions (pre-pay, deposits, limits), and Sales/CPQ risk indicators",
+              "MCP exposure for external risk engines: Customers can plug in external credit rating/fraud systems while using Zuora as the monetization and AR backbone"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Collections Manager Agent"],
+            "supporting_agents": ["Risk Scoring Agent", "Quote Agent"]
+          }
+        },
+        {
+          "id": "dunning_payment_retry",
+          "name": "Dunning and Payment Retry",
+          "subtitle": "",
+          "row": 3,
+          "col": 4,
+          "why_it_matters": "Traditional dunning is template-based not personalized, reactive and slow, and hard to optimize against both recovery rate and churn risk.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "GenAI + Predictive AI collections workflow hub that sorts customers into automated dunning + CC retry flows or priority queues for agents",
+              "Proactive collections chatbot that engages customers to show simplified bills and collect payment in their preferred channel/method"
+            ],
+            "ai_agents": [
+              "Notification AI Bot: For failed payments—automating dunning/retry triggers",
+              "Collections Manager Agent: Persona-specific agent aimed at automating collections and follow-up workflows"
+            ],
+            "mcp_tools": [
+              "Sort customers into automated dunning vs priority queues",
+              "Trigger dunning workflow entry or CS handoff",
+              "Summarize which customers and amounts are impacted"
+            ]
+          },
+          "how_it_works_today": "Payment failures trigger alerts. Notification AI Bot summarizes which customers and amounts are impacted and may call standard procedures (retry logic, dunning workflow entry, or CS handoff). Collections products handle multi-step dunning and retry policies; AI is starting to optimize who goes into which path.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Adaptive dunning strategies: Use customer value, engagement history, and credit risk to automatically choose dunning tone, channel, and cadence, and select which retries are worth attempting",
+              "Agent-driven customer interaction: Customer-facing agents (email/chat) that explain the reason for failed payments in plain language, propose easy actions (update card, change method, partial payments) and execute via MCP tools"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Notification AI Bot", "Collections Manager Agent"],
+            "supporting_agents": ["Customer Health Agent"]
+          }
+        },
+        {
+          "id": "collections",
+          "name": "Collections",
+          "subtitle": "",
+          "row": 4,
+          "col": 4,
+          "why_it_matters": "Collections teams are overloaded: manually prioritizing accounts, writing bespoke emails and call scripts, reconciling disputes and partial payments across systems. This is a prime area for AI agents as 'workforce multipliers'.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Collections Manager Agent is an explicit persona in the Zuora AI agent lineup",
+              "IDC Collect AI patterns: GenAI letters and call scripting that are legal, contextual, and personalized by billing and relationship history",
+              "Predictive models to identify probable non-payment or churn events and engage customers proactively",
+              "Auto-Pilot O2C framing: Collect stage's agentic goal is 'Autonomous payment recovery' with Notification AI Bot orchestrating early escalation and remediation",
+              "Unified monetization workspace and Collections modules provide data + execution rails for AI decisions"
+            ],
+            "ai_agents": [
+              "Collections Manager Agent"
+            ],
+            "mcp_tools": [
+              "Generate collection emails and scripts based on invoice + payment history and customer's region/language",
+              "Route low-value/low-risk cases to automated flows",
+              "Route high-impact accounts to human collectors with AI-generated context and scripts"
+            ]
+          },
+          "how_it_works_today": "Early implementations: Agents generate collection emails and call scripts based on invoice + payment history and customer's region/language. Collections workflows route low-value/low-risk cases to automated flows and high-impact accounts to human collectors, with AI-generated context and scripts.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Full 'Collections Copilot': Collections Agent using MCP to pull a 360° view (subscriptions, invoices, payments, disputes), score accounts by collectability and strategic importance, auto-suggest next actions (calls, offers, settlements) and execute low-risk steps under policy",
+              "Tighter integration with Dispute Prediction: As Dispute Prediction matures, collections agents will see potential disputes before invoices are overdue, enabling softer, proactive outreach and reducing formal collections volume"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Collections Manager Agent"],
+            "supporting_agents": ["Notification AI Bot", "Customer Health Agent"]
+          }
+        },
+        {
+          "id": "partner_settlement",
+          "name": "Partner Settlement",
+          "subtitle": "Incentives and Payment",
+          "row": 5,
+          "col": 4,
+          "why_it_matters": "Many Zuora customers sell through resellers, distributors, marketplaces and owe rebates, revenue shares, and incentives based on complex subscription and usage metrics. Manual settlement processes create disputes with partners, delays in paying rebates, and poor visibility into channel profitability.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Partner Settlement under Collect in the lifecycle",
+              "Partner/Channel Intelligence and Benchmarks in Learn phase as part of the analytic loop",
+              "Revenue and AR agents already handle Reconciliation AI between subledgers and ERP/GL and Data Management Agent for anomaly detection and validation"
+            ],
+            "ai_agents": [
+              "Revenue and AR agents for reconciliation"
+            ],
+            "mcp_tools": [
+              "MCP + unified data platform give AI agents structured access to partner accounts and contracts, invoices, usage, revenue recognition records"
+            ]
+          },
+          "how_it_works_today": "Partner settlement is still primarily rules + reporting-driven, with Revenue and AR agents helping ensure the underlying data is accurate and reconciled before settlements are calculated and paid.",
+          "whats_coming": {
+            "timeline": "12-24M",
+            "capabilities": [
+              "Partner settlement intelligence via agents: Combine channel/partner intelligence from Learn phase with AR/revenue data so agents can calculate partner-level revenue shares and rebates, flag anomalies in partner payouts, and propose or initiate settlement runs under human approval",
+              "MCP-exposed partner APIs: Over time, partner-facing agents (e.g., in distributor portals) will be able to query settlements and incentive status via MCP, reducing disputes and support load"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Revenue Accountant Agent"],
+            "supporting_agents": ["Reconciliation AI", "Data Management Agent"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "provision",
+      "name": "Provision",
+      "color": "#F9A825",
+      "agentic_goal": "Instant access & entitlement",
+      "key_question": "Is customer access granted automatically via an MCP-governed workflow?",
+      "strategy_context": "Go from manual hand-offs between billing and downstream systems to instant, policy-driven access and fulfillment. MCP and the Remote MCP Server provide the standard way agents call entitlement, inventory, order-state, and provisioning workflows. Anantha (Concierge) and Infra/DACO Agents are the relevant specialists.",
+      "capabilities": [
+        {
+          "id": "entitlement_management",
+          "name": "Entitlement Management",
+          "subtitle": "",
+          "row": 1,
+          "col": 5,
+          "why_it_matters": "For digital and hybrid businesses, entitlements are the real product—they determine which features, content, seats, and environments each customer can use. Without robust entitlements: provisioning is brittle and manual, upsell/cross-sell and churn prevention are harder to automate, and audit/compliance around 'who had access to what, when' is weak.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Entitlement Management as part of the Monetization Catalog and commerce foundation",
+              "Workflow for Entitlements Provisioning and Execution, Order Orchestration",
+              "Features & Entitlements simplify product creation and provisioning by automating feature gating instead of relying on custom objects",
+              "Integrated entitlements power intelligent upsell, cross-sell and churn mitigation through dynamic, AI-driven offers"
+            ],
+            "ai_agents": [
+              "Developer MCP for entitlement setup",
+              "Catalog + Features & Entitlements are part of the Race-to-50 AI feature set"
+            ],
+            "mcp_tools": [
+              "Define and reuse features across products",
+              "Automate provisioning and entitlements based on what the customer buys",
+              "Ask 'what should this customer be entitled to now?'",
+              "Adjust entitlements when orders or contracts change"
+            ]
+          },
+          "how_it_works_today": "AI is primarily assisting product teams in defining feature/entitlement structures (via MCP + Developer/knowledge tools). MCP servers expose subscription and entitlement objects so AI agents can query entitlement status and adjust when orders/contracts change.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Autonomous entitlement updates on order/contract changes",
+              "Customer-facing agents explaining entitlements",
+              "Integrated upsell/cross-sell powered by entitlement gaps"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Developer MCP", "Provisioning Agent"],
+            "supporting_agents": ["Anantha Concierge"]
+          }
+        },
+        {
+          "id": "inventory",
+          "name": "Inventory",
+          "subtitle": "",
+          "row": 2,
+          "col": 5,
+          "why_it_matters": "Tracking physical or digital stock accurately is essential for fulfillment and avoiding over-promising in quotes.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Inventory: Visibility, Pools, Management",
+              "Integration with fulfillment workflows"
+            ],
+            "ai_agents": [
+              "Fulfillment/provisioning agents"
+            ],
+            "mcp_tools": [
+              "Query inventory levels and pools",
+              "Update availability based on orders"
+            ]
+          },
+          "how_it_works_today": "Inventory services integrated with commerce and fulfillment. AI starting to assist in availability queries.",
+          "whats_coming": {
+            "timeline": "12-24M",
+            "capabilities": [
+              "Real-time inventory-aware quoting",
+              "AI-driven inventory optimization recommendations"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Fulfillment Agent"],
+            "supporting_agents": ["Quote Agent"]
+          }
+        },
+        {
+          "id": "fulfillment_ship",
+          "name": "Fulfillment and Ship",
+          "subtitle": "",
+          "row": 3,
+          "col": 5,
+          "why_it_matters": "For hybrid products (physical + digital), digital entitlements must be applied and partners/systems must stay in sync. Without automation: Fulfillment teams chase spreadsheets and tickets, and pauses, resumes, address changes, and returns lead to errors.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Fulfillment: Drop Ship, Delivery, Order as part of Commerce strategy",
+              "Integration with external fulfillment systems (e.g., Zuora manages subscriptions/entitlements while Naviga manages print fulfillment/delivery)"
+            ],
+            "ai_agents": [
+              "Workflow AI concepts for orchestration"
+            ],
+            "mcp_tools": [
+              "Understand subscriptions, orders, and entitlements",
+              "Initiate or track fulfillment via MCP rather than bespoke integrations"
+            ]
+          },
+          "how_it_works_today": "Fulfillment is driven by workflows and integrations—orders flow out, status and exceptions come back and are reflected in subscription state. AI is starting to assist in orchestrating these flows (via Workflow AI concepts) and support GS-led projects where agents help map and validate fulfillment processes.",
+          "whats_coming": {
+            "timeline": "12-24M",
+            "capabilities": [
+              "Agent-orchestrated fulfillment workflows: Provisioning/fulfillment agents that interpret order + entitlement context, call out to 3rd-party systems via MCP/Workflow/Lambda, monitor responses and update order/subscription status automatically",
+              "Customer-visible fulfillment intelligence: Customer-facing agents (portal/chat) that explain where an order is in the fulfillment pipeline and initiate changes that propagate back through Zuora and out to partners via MCP"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Fulfillment Agent", "Workflow AI Bot"],
+            "supporting_agents": ["Anantha Concierge"]
+          }
+        },
+        {
+          "id": "deployment_provisioning",
+          "name": "Deployment / Provisioning",
+          "subtitle": "",
+          "row": 4,
+          "col": 5,
+          "why_it_matters": "For SaaS and digital products, provisioning is the moment of truth—customers expect instant access after payment or order approval. Delays cause dissatisfaction and churn risk. Manual activation and de-provisioning create errors and audit gaps.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Provisioning triggered upon payment confirmation",
+              "Automatic access grant (token generation, platform setup, service enablement)",
+              "De-provisioning upon cancellation or change, updating entitlements accordingly",
+              "Links subscription/order setup → approval/order management → provisioning with 3rd-party platforms"
+            ],
+            "ai_agents": [
+              "Provisioning Agents",
+              "Infra/DACO Agents",
+              "At Level 4 maturity: Remote MCP Server & Provisioning Agents provide shared toolkit for multiple agents (Slack, Glean) to support high transaction volumes globally"
+            ],
+            "mcp_tools": [
+              "Tools for Subscription Management and Fulfillments & Delivery Adjustments",
+              "Help configure and test provisioning flows end-to-end"
+            ]
+          },
+          "how_it_works_today": "Provisioning is orchestrated through workflows and integrations with triggers from orders or payments, calls to external systems for account/tenant/user setup, and updates back into Zuora subscriptions and entitlements. AI agents mainly assist with configuration and troubleshooting and participate in GS-led implementations to accelerate mapping and validation.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Autonomous provisioning huddles: Under Anantha's orchestration, Provisioning Agents, Infra Agents, DACO/Mediation Agents will receive events (new order, payment posted), verify entitlements and inventory, call downstream provisioning APIs, and confirm or roll back with full observability, explainability, and auditability",
+              "MCP-governed, tenant-safe activation: Remote MCP Server provides per-tenant isolation and tooling to ensure agents only perform approved provisioning actions, with clear logs and governance controls"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Provisioning Agent", "Anantha Concierge"],
+            "supporting_agents": ["Infra/DACO Agents"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "recognize_report",
+      "name": "Recognize and Report",
+      "color": "#6A1B9A",
+      "agentic_goal": "Automated compliance summaries",
+      "key_question": "Are we using AI to draft our incident and financial compliance summaries?",
+      "strategy_context": "Move from manual, spreadsheet-heavy close and reporting to AI-assisted, explainable, and auditable revenue operations. Rich set of specialist revenue agents: Revenue Accountant Agent, Revenue Manager Agent, Revenue Narrator, Data Management Agent, SSP Analyzer, Query Assistant, Reconciliation AI, DataFix AI. MCP Servers + Unified Data Platform expose billing, revenue, AR, and benchmark data to AI agents.",
+      "capabilities": [
+        {
+          "id": "revenue_recognition",
+          "name": "Revenue Recognition",
+          "subtitle": "",
+          "row": 1,
+          "col": 6,
+          "why_it_matters": "Revenue accounting teams face complex multi-element, multi-year, consumption-based contracts, Significant Financing Component (SFC) and other advanced GAAP requirements, and pressure to close faster while maintaining accuracy and auditability.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "SFC Intelligence: Auto-identify SFC contracts, scenario-based interest modelling, AI explanations of SFC impact",
+              "Complex Consumption Monetization: FX, multi-entity, real-time usage anomaly detection"
+            ],
+            "ai_agents": [
+              "Revenue Accountant Agent: Improves data quality, automates reconciliation, explains revenue behavior to spot issues early, resolve complexity faster, and close with confidence",
+              "Revenue Narrator: Explains contract changes and revenue impacts in plain language with links to audit trails",
+              "Data Management Agent: Dynamic validation framework with real-time anomaly detection and adaptive checks",
+              "Revenue Stage Analysis: Predicts how staged transactions will group into revenue contracts, detects data issues, scores confidence",
+              "Reconciliation AI: Automates data recon between revenue subledger and ERP/GL",
+              "DataFix AI: Diagnoses data issues and recommends or auto-executes low-risk fixes",
+              "Revenue Manager Agent: Handles Audit Preparation, Financial Reporting acceleration, and Multi-year forecasting"
+            ],
+            "mcp_tools": [
+              "MCP Servers expose revenue schedules, usage, and billing context",
+              "Work directly on Zuora's complex revenue models rather than relying on exports"
+            ]
+          },
+          "how_it_works_today": "Agents support revenue recognition by validating transaction staging and contract groupings, explaining period-over-period revenue movements in natural language, and highlighting anomalies or policy deviations. Human revenue accountants remain in control, but with AI handling narrative explanations, first-pass diagnostics, and repetitive reconciliation tasks.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "More autonomous close & insight: 'Autonomous Close & Insights'—automated variance explanations, AI reconciliation & exception detection, pre-close risk diagnostics",
+              "Deeper SFC and policy automation: AI-driven identification of SFC and other policy-specific treatments with scenario simulations and plain-language explanations of P&L and disclosure impact"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Revenue Accountant Agent", "Revenue Narrator"],
+            "supporting_agents": ["Data Management Agent", "Reconciliation AI", "DataFix AI"]
+          }
+        },
+        {
+          "id": "accounting_ledger",
+          "name": "Accounting Ledger",
+          "subtitle": "",
+          "row": 2,
+          "col": 6,
+          "why_it_matters": "Controllers and CFOs need clean reconciliation from subledgers (Billing, Revenue) to ERP/GL, fast period close, and confidence in journal integrity across complex models.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Unified data warehouse architecture bringing together Billing, Revenue, Analytics, Benchmarks, and CPQ into a single foundation",
+              "Platform explicitly designed for AI agents as well as human users"
+            ],
+            "ai_agents": [
+              "Reconciliation AI: Automates reconciliation across revenue subledger, ERP, and GL",
+              "Revenue Accountant Agent & Data Management Agent: Improve revenue data quality, validate transaction data, ensure continuous audit readiness"
+            ],
+            "mcp_tools": [
+              "MCP Servers expose ledger-relevant objects (invoices, journal summaries, revenue schedules)",
+              "Simplified automated GL summary integrations (e.g., to SAP, Workday)",
+              "AI-driven diagnostics on ledger mismatches"
+            ]
+          },
+          "how_it_works_today": "Revenue and data agents assist with subledger → ERP/GL reconciliation, pointing out which contracts or transactions cause deltas. They draft explanations for ledger variances that feed into management reporting.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "More automated journal workflows: Closer coupling of Billing & Revenue journal integrations with Reconciliation AI so journals are validated before posting and exceptions are auto-flagged with recommended corrections",
+              "AI-first ledger narratives: Revenue Manager Agent and Revenue Narrator extending into GL impact explanations for the board and auditors"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Reconciliation AI", "Revenue Accountant Agent"],
+            "supporting_agents": ["Data Management Agent"]
+          }
+        },
+        {
+          "id": "usage_entitlement_enforcement",
+          "name": "Usage and Entitlement Enforcement",
+          "subtitle": "",
+          "row": 3,
+          "col": 6,
+          "why_it_matters": "For usage-based and entitlements-driven models: Over-consumption without enforcement → revenue leakage & SLA risk. Over-enforcement → poor customer experience. Enforcement needs to be contract-aware and entitlement-aware.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Features & Entitlements in the Monetization Catalog provide native management of feature-level entitlements",
+              "Advanced state management plus fulfilment and metering",
+              "Usage anomaly detection and complex consumption monetization are key investment areas"
+            ],
+            "ai_agents": [
+              "Mediation/DACO Agents for usage anomalies"
+            ],
+            "mcp_tools": [
+              "MCP Servers give agents structured access to usage, entitlements, and subscription context",
+              "Reason about whether current usage is within contracted bounds",
+              "Flag unexpected spikes or patterns that may violate contractual limits"
+            ]
+          },
+          "how_it_works_today": "Entitlement rules and usage limits are enforced primarily through catalog + entitlements + mediation/usage billing, with anomaly detection and mediation agents helping surface potential over- or under-use.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Dedicated usage/entitlement enforcement agents: Agents that continuously monitor entitlements vs usage, trigger actions (notifications, plan changes, overage charges, or suspensions) via MCP-governed workflows, and feed insights back into pricing and packaging for optimization",
+              "Customer-visible transparency: Portal/chat agents that explain 'What am I entitled to?', 'Why was this overage applied?', 'What are my options to stay within limits?'—all backed by actual entitlements and usage via MCP"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Mediation/DACO Agent"],
+            "supporting_agents": ["DQ/Trino Agent", "Customer Portal Agent"]
+          }
+        },
+        {
+          "id": "reporting_dashboards",
+          "name": "Reporting and Dashboards",
+          "subtitle": "",
+          "row": 4,
+          "col": 6,
+          "why_it_matters": "Today, many customers export to spreadsheets/BI tools, spend days building board decks, and struggle to get real-time, cross-product views. AI-ready reporting requires a unified, trusted data layer.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "One Unified Data Platform: A single data platform workspace that consolidates Billing + Revenue + Analytics + Benchmarks + CPQ into one storage and reporting layer",
+              "Single source of truth for all monetization reporting",
+              "Dramatically faster time-to-insight and reduced custom report building"
+            ],
+            "ai_agents": [
+              "Query Assistant / Revenue Data Query: Natural language queries with auto-generated, validated SQL for ad-hoc revenue analysis",
+              "Revenue Narrator and Revenue Manager Agent: Generate narrative explanations and pull together data for financial reporting and multi-year forecasts",
+              "Operational Intelligence providing structured and secured access for both humans and AI agents"
+            ],
+            "mcp_tools": [
+              "Access subscriptions, invoices, revenue schedules, metrics",
+              "Compute and explain revenue/profit KPIs"
+            ]
+          },
+          "how_it_works_today": "Customers can use unified reporting (new data warehouse + reporting layer) to query across billing and revenue in one interface. AI-powered querying and narratives layer on top.",
+          "whats_coming": {
+            "timeline": "NOW-6M",
+            "capabilities": [
+              "Board decks generated via AI",
+              "Real-time, conversational dashboards",
+              "Role-aware, permission-aware data access for agents"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Query Assistant", "Revenue Manager Agent"],
+            "supporting_agents": ["Revenue Narrator"]
+          }
+        },
+        {
+          "id": "tax",
+          "name": "Tax",
+          "subtitle": "",
+          "row": 5,
+          "col": 6,
+          "why_it_matters": "Managing regional and global tax compliance across complex subscription structures is error-prone and audit-sensitive.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Tax engine integration",
+              "Tax reporting as part of unified data"
+            ],
+            "ai_agents": [
+              "Revenue agents and Data Management Agent for tax-related anomalies (e.g., unusual effective tax rates)"
+            ],
+            "mcp_tools": [
+              "Access tax calculations and reporting",
+              "Flag unusual effective tax rates"
+            ]
+          },
+          "how_it_works_today": "Tax calculations handled by tax engine. Revenue agents can flag anomalies related to unusual tax outcomes.",
+          "whats_coming": {
+            "timeline": "12-24M",
+            "capabilities": [
+              "Tax-aware diagnostics and narratives: Extending Revenue Narrator and Data Management Agent to explain unusual tax outcomes and flag configuration or data issues that could cause audit problems",
+              "Closer integration between tax and revenue intelligence: Agents that factor tax implications into revenue forecasting, margin analysis, and disclosures as part of their scenario modelling"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Revenue Accountant Agent"],
+            "supporting_agents": ["Data Management Agent"]
+          }
+        },
+        {
+          "id": "compliance",
+          "name": "Compliance",
+          "subtitle": "",
+          "row": 6,
+          "col": 6,
+          "why_it_matters": "Compliance spans financial reporting (GAAP/IFRS), auditability (clear trails of who did what, when, and why), and operational incidents (RCAs, security, data handling). AI must improve compliance, not undermine it.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Recognize & Report's goal is 'Automated compliance summaries' using RCA Agent and DQ Agents",
+              "AI & agent platform strategy emphasizes radical transparency: 'What the system is observing (observability)', 'How decisions were made (explainability)', 'What actions were taken, by whom, and why (auditability)'",
+              "MCP + Anantha design centralizes logging, policy, and approvals for agent actions, including zuora_approval-style human-in-the-loop controls"
+            ],
+            "ai_agents": [
+              "RCA Agent: Assists in drafting Root Cause Analyses using standardized templates",
+              "DQ/Trino Agent & Data Management Agent: Provide continuous data validation, anomaly detection, and adaptive thresholds, supporting continuous audit readiness"
+            ],
+            "mcp_tools": [
+              "Draft incident and compliance summaries",
+              "Continuous data validation and audit readiness",
+              "Link revenue changes to contracts and workbench actions"
+            ]
+          },
+          "how_it_works_today": "RCA Agent and DQ/Trino Agent draft incident RCAs and provide diagnostics and health checks that are reusable for compliance documentation. Revenue agents generate narratives and explanations that support audit and reporting.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Agent-generated compliance packs: For financial close and incidents—auto-assembled packages including RCAs, reconciliations, data validations, and narrative summaries suitable for auditors and regulators",
+              "Unified audit & observability for all agents: Shift toward a unified audit/logging/observability experience, starting with AI agents, so every agent decision and action is explainable and reviewable across products"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["RCA Agent", "DQ/Trino Agent"],
+            "supporting_agents": ["Data Management Agent", "Revenue Accountant Agent"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "name": "Learn",
+      "color": "#EF6C00",
+      "agentic_goal": "Closed-loop intelligence",
+      "key_question": "Do insights feed back automatically into Configure, Quote, Invoice, Collect?",
+      "strategy_context": "Turn raw monetization data into closed-loop intelligence that feeds back into Configure, Quote, Invoice, Collect, and Provision. Core tools: Churn Agent, Outcomes Simulation Agent, Revenue agents, DQ/Trino Agent, Data Management Agent, ARK (Acquisition & Retention Knowledge Graph), Unified Data Platform, and MCP Servers.",
+      "capabilities": [
+        {
+          "id": "revenue_profit_insights",
+          "name": "Revenue and Profit Insights",
+          "subtitle": "",
+          "row": 1,
+          "col": 7,
+          "why_it_matters": "Leaders need forward-looking and driver-based views of revenue, margin, and cash, and product/channel profitability. Today, many rely on manual spreadsheets and siloed BI.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Unified Data Platform & Reporting: A new unified data warehouse combines Billing, Revenue, Analytics, Benchmarks, and CPQ, with one schema browser and reporting layer",
+              "Real-time billing forecasts with confidence ranges and assumptions delivered through the unified data platform and AI agents"
+            ],
+            "ai_agents": [
+              "Revenue Accountant Agent and Revenue Manager Agent: Explain revenue behavior, accelerate reporting, enable multi-year revenue forecasting (GAAP and non-GAAP)",
+              "AI-Powered Value Agents: 'Accounting & Finance team force multipliers' for insights and automation",
+              "Finance Intelligence agents"
+            ],
+            "mcp_tools": [
+              "MCP Servers expose subscriptions, invoices, revenue schedules, and metrics",
+              "Agents (Concierge, Revenue, Finance Intelligence) can compute and explain revenue/profit KPIs directly on Zuora data"
+            ]
+          },
+          "how_it_works_today": "A finance user (or AI agent on their behalf) can ask for Q1 billing forecast, margin by product, or MRR trends. They get numeric answers plus plain-language explanations of drivers drawn from revenue contracts, billing, and usage.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Autonomous close & insight loops: Closer integration of Revenue/Finance agents, bill forecasting, and anomaly detection to provide pre-close diagnostics, automated variance explanations, and continuous profitability views across product/segment/channel"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Revenue Manager Agent", "Finance Intelligence Agent"],
+            "supporting_agents": ["Revenue Accountant Agent"]
+          }
+        },
+        {
+          "id": "customer_insights",
+          "name": "Customer Insights",
+          "subtitle": "Churn Detect",
+          "row": 2,
+          "col": 7,
+          "why_it_matters": "Retention is often more valuable than new acquisition—but churn risk signals are spread across usage, billing, payments, support, product. Without AI, it's hard to proactively see and act on churn risk.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Acquisition & Retention Knowledge Graph (ARK): A graph built on the unified data strategy to support the Churn Agent, blending signals across lifecycle systems",
+              "Zephr AI Paywall: Personalizes offers and drives conversion and LTV uplift using behavioral signals that feed churn/retention insights",
+              "Collections AI: Ties billing and payment behavior to churn risk and proactive outreach"
+            ],
+            "ai_agents": [
+              "Churn Agent: Analyzing anomalies and behavioral patterns around customer churn",
+              "Customer Health Agent: Monitors subscriber signals in real time, flags churn risks, recommends next-best actions"
+            ],
+            "mcp_tools": [
+              "Read usage, subscription events, collections data, and entitlements via MCP",
+              "Score churn risk and propose actions (e.g., targeted offers via CPQ/paywall, CS outreach)"
+            ]
+          },
+          "how_it_works_today": "Churn/health agents use MCP to read usage, subscription events, collections data, and entitlements. They score churn risk and propose actions (e.g., targeted offers via CPQ/paywall, CS outreach).",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Deeper lifecycle-aware churn models: Combine insights from Quote, Invoice, Collect, Provision to refine churn scores and drive automated 'next best action' offers and coordinated playbooks across CS, sales, and marketing"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Churn Agent", "Customer Health Agent"],
+            "supporting_agents": ["Collections Manager Agent", "Customer Success Agent"]
+          }
+        },
+        {
+          "id": "offer_insights",
+          "name": "Offer Insights",
+          "subtitle": "",
+          "row": 3,
+          "col": 7,
+          "why_it_matters": "Businesses struggle to understand which offers, bundles, and discounts actually drive profitable, durable growth, and to tie offer performance to churn, expansion, and margin.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Offer Insights: Evaluating performance of specific deals and offers",
+              "Outcomes Simulation Agent: Runs what-if simulations for plans, evaluating billing and revenue outcomes",
+              "Rateplan & SKU Insights: Visuals into product performance, attribute usage, and pricing elasticity; AI recommending bundling opportunities, whitespace, and pricing adjustments",
+              "Intelligent Merchandising and Promotions Management: AI helps optimize offer performance across channels and segments"
+            ],
+            "ai_agents": [
+              "Outcomes Simulation Agent"
+            ],
+            "mcp_tools": [
+              "Measure how a given offer/deal performs on ARR, margin, churn, and adoption vs peers",
+              "Feed insights back into pricing and catalog decisions or CPQ guidance"
+            ]
+          },
+          "how_it_works_today": "Using MCP + data platform, agents can measure how a given offer/deal performs on ARR, margin, churn, and adoption vs peers, and feed that back into pricing and catalog decisions or CPQ guidance.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Closed-loop experimentation: An Acquisition-to-Cash experimentation framework allowing controlled tests of offers, AI-driven analysis of which deals to scale up or retire, feeding directly into catalog and CPQ rules"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Outcomes Simulation Agent"],
+            "supporting_agents": ["Developer MCP"]
+          }
+        },
+        {
+          "id": "customer_value_intelligence",
+          "name": "Customer Value Intelligence",
+          "subtitle": "Transactions, Usage, Risk",
+          "row": 4,
+          "col": 7,
+          "why_it_matters": "Decisions about upsell, retention, or pricing should be based on true customer value: past transactions, current usage, credit and churn risk. Without a unified view, teams optimize on the wrong signals.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Customer Value Intelligence as Learn-stage capability",
+              "Unified monetization data platform: Single workspace across Commerce + Billing + AR + Revenue, designed for AI agents as well as people",
+              "ARK (Acquisition & Retention Knowledge Graph): Connects lifecycle data into a graph to support Customer Value Intelligence and churn/retention use cases"
+            ],
+            "ai_agents": [
+              "Churn Agent, Collections Agent, Revenue Agents, CPQ Quote Agent, and Customer Health Agent each bring a piece of the value picture: Payments/risk, Revenue and margin, Product usage and package fit"
+            ],
+            "mcp_tools": [
+              "Agents share context via MCP and unified data",
+              "Enable richer insights (e.g., quoting guided by account-level value metrics)"
+            ]
+          },
+          "how_it_works_today": "CVI is primarily emerging as a cross-agent concept. Agents share context via MCP and unified data, enabling richer insights (e.g., quoting guided by account-level value metrics).",
+          "whats_coming": {
+            "timeline": "12-24M",
+            "capabilities": [
+              "First-class Customer Value metrics & agents: Dedicated CVI dashboards and agents surfacing LTV, NRR, risk-adjusted value, product coverage, and whitespace, with recommended actions per customer (renewal strategy, upsell path, discount policies)"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Customer Health Agent"],
+            "supporting_agents": ["Churn Agent", "Collections Manager Agent", "Quote Agent"]
+          }
+        },
+        {
+          "id": "price_profit_optimization",
+          "name": "Price/Profit Optimization",
+          "subtitle": "",
+          "row": 5,
+          "col": 7,
+          "why_it_matters": "Pricing teams must navigate usage models, dynamic pricing, discounts, and commitments while balancing growth vs margin vs churn. Manual price studies can't keep up with dynamic markets.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Price/Profit Optimization explicitly in the lifecycle",
+              "Dynamic and attribute-based pricing: Monetization Catalog supports Dynamic Pricing using real-time customer and business context",
+              "Rateplan & SKU Insights: Analyze elasticity and product/attribute performance and recommend pricing/bundling changes"
+            ],
+            "ai_agents": [
+              "Outcomes Simulation Agent: Simulates 'what-if' plan and pricing scenarios, including revenue and margin projections"
+            ],
+            "mcp_tools": [
+              "Test new price points and tiers",
+              "Understand profitability impacts before changes go live"
+            ]
+          },
+          "how_it_works_today": "Pricing teams can use simulation and insights to test new price points and tiers and understand profitability impacts before changes go live.",
+          "whats_coming": {
+            "timeline": "12-24M",
+            "capabilities": [
+              "Automated optimization loops: Tie simulation agent, dynamic pricing engine, and Learn-phase telemetry together so agents continuously suggest or apply pricing adjustments to hit margin, growth, or retention goals"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Outcomes Simulation Agent"],
+            "supporting_agents": ["Developer MCP", "Revenue Manager Agent"]
+          }
+        },
+        {
+          "id": "partner_channel_intelligence",
+          "name": "Partner/Channel Intelligence",
+          "subtitle": "",
+          "row": 6,
+          "col": 7,
+          "why_it_matters": "Partner and channel motions are critical for scale, but performance data is often siloed and incentives and settlements lack clear ROI metrics.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Partner/Channel Intelligence explicitly in the lifecycle",
+              "Business Context Service + Commerce Foundation provide channel, site, and account context used in pricing, offers, and eligibility",
+              "Unified data platform: With data across CPQ, Billing, Revenue, and Collections, can analyze channel/partner revenue and margin, churn and expansion by channel"
+            ],
+            "ai_agents": [
+              "Collections & Revenue agents can already slice insights by account structures, which is a building block for channel analytics"
+            ],
+            "mcp_tools": [
+              "Analyze channel/partner revenue and margin",
+              "Track churn and expansion by channel"
+            ]
+          },
+          "how_it_works_today": "Channel intelligence is mostly reporting-driven using unified data and context attributes. AI/agents are starting to layer narratives and anomaly detection on top.",
+          "whats_coming": {
+            "timeline": "12-24M",
+            "capabilities": [
+              "Dedicated partner/channel intelligence agents: Agents that track partner performance vs targets (ARR, margin, churn, collection performance) and recommend adjustments to incentives, channel mix, and partner strategy"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Revenue Manager Agent"],
+            "supporting_agents": ["Collections Manager Agent"]
+          }
+        },
+        {
+          "id": "benchmarks",
+          "name": "Benchmarks",
+          "subtitle": "",
+          "row": 7,
+          "col": 7,
+          "why_it_matters": "Execs want to know: 'Are we doing well for our segment and model?' and 'Where are we under- or over-performing vs peers?'",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Benchmarks as a Learn-stage element",
+              "Unified data warehouse planned to incorporate Benchmarks alongside Billing & Revenue",
+              "Anonymized industry benchmarks as part of Rateplan & SKU Insights and pricing/offer optimization"
+            ],
+            "ai_agents": [
+              "Revenue agents with benchmark awareness"
+            ],
+            "mcp_tools": [
+              "Access benchmark data for comparison",
+              "Incorporate peer comparison into recommendations"
+            ]
+          },
+          "how_it_works_today": "Early stages. Benchmarks are mainly conceptual and pilot-level, used in pricing/offer analysis and analyst/market research content.",
+          "whats_coming": {
+            "timeline": "12-24M",
+            "capabilities": [
+              "Benchmark-aware agents and dashboards: Agents that compare a customer's growth, churn, pricing, and margins vs anonymized peers by industry, model, and size, and recommend where to focus improvements (pricing, product packaging, collections, channel mix)"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Revenue Manager Agent"],
+            "supporting_agents": ["Outcomes Simulation Agent"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "sustain_grow",
+      "name": "Sustain and Grow",
+      "color": "#1976D2",
+      "agentic_goal": "Proactive retention & expansion",
+      "key_question": "Are churn risks being addressed before customers leave?",
+      "strategy_context": "As growth matures, net retention depends on identifying at-risk customers early and deploying targeted, profitable win-back offers and expansion paths. Key agents: Churn Agent, Customer Health Agent, Customer Success Agent, Quote Agent / Deal Assist.",
+      "capabilities": [
+        {
+          "id": "churn_prevent",
+          "name": "Churn Prevention",
+          "subtitle": "Win-back Offers",
+          "row": 1,
+          "col": 8,
+          "why_it_matters": "As growth matures, net retention depends heavily on identifying at-risk customers early and deploying targeted, profitable win-back offers—not blanket discounts.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Zephr AI Paywall: Uses ML to personalize subscription offers in real-time (FT example: near-doubling of conversions and 78% lift in LTV)",
+              "Collections AI & AR signals: Automate workflows, predict payment/non-payment, connect billing+CRM+support data—key inputs into churn risk and win-back targeting",
+              "Unified Data Platform combines usage, billing, revenue, AR, and CPQ in one layer for both humans and agents"
+            ],
+            "ai_agents": [
+              "Churn Agent: In-progress business agent focused on anomalies and behavioral patterns around churn",
+              "Customer Health Agent: Monitors subscriber signals in real time, flags churn risks, proactively recommends next-best actions to preserve and grow recurring revenue"
+            ],
+            "mcp_tools": [
+              "MCP Servers expose context (subscriptions, usage, invoices, collections status)",
+              "Churn and health agents can compute risk and invoke tools that drive win-back offers in CPQ, paywalls, or campaigns"
+            ]
+          },
+          "how_it_works_today": "Early implementations use churn/health scoring plus AI-driven offers (e.g., via Zephr AI Paywall) to identify segments at risk and present retention offers (discounted terms, downgraded plans, added value) via digital channels.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Closed-loop churn prevention: Tie together Churn Agent + Customer Health Agent, CPQ/offer engines (for B2B) and AI paywall/personalization (for B2C), and Collections and CS workflows, so agents can select and deploy the right win-back playbook per customer, with clear measurement of retention and profitability"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Churn Agent", "Customer Health Agent"],
+            "supporting_agents": ["Collections Manager Agent", "Quote Agent"]
+          }
+        },
+        {
+          "id": "renewals",
+          "name": "Renewals",
+          "subtitle": "CPQ, Upsell/Cross-sell",
+          "row": 2,
+          "col": 8,
+          "why_it_matters": "Renewal moments are the best point for expansion (upsell, cross-sell) and also a major churn risk if renewals are manual, late, or mis-priced.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "CPQ: Combines new sales, amendments, and renewals into a single quote, visualized in a purpose-built UI",
+              "Auto-gen Renewal Quotes: CPQ roadmap includes auto-generated renewal quotes from contract state and usage history",
+              "AI-assisted renewal strategy: Renewal → AI agent provides insights on how to make the renewal (expansion, pricing, structure)",
+              "Guided selling + dynamic pricing features apply equally to renewals and expansions"
+            ],
+            "ai_agents": [
+              "Deal Assist / Deal Sense agents: Generate alternative quote scenarios to meet financial and product boundaries, very relevant in renewal/amendment contexts"
+            ],
+            "mcp_tools": [
+              "CPQ catalog and order services are MCP-compliant",
+              "Read current subscriptions and contracts",
+              "Generate proposed renewal quotes (including upsells/cross-sells)",
+              "Push into CPQ for approval and order conversion"
+            ]
+          },
+          "how_it_works_today": "AI-assisted renewals use account insights + contract history to auto-generate renewal quotes, propose expansion paths and pricing, and let reps or CS accept, tweak, or compare alternatives in CPQ.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "Fully agentic renewal flows for B2B: Agents that watch renewal horizons and pre-stage renewal/expansion quotes with recommended structures and pricing, routed via CPQ workflows",
+              "For B2C/hybrid: Integration with AI Paywall & Customer Health Agent to coordinate self-serve renewal offers and assisted renewal with sales/CS for high-value accounts"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Quote Agent / Deal Assist"],
+            "supporting_agents": ["Customer Health Agent", "Revenue Manager Agent"]
+          }
+        },
+        {
+          "id": "customer_success",
+          "name": "Customer Success",
+          "subtitle": "Health, Education",
+          "row": 3,
+          "col": 8,
+          "why_it_matters": "Customer Success teams must monitor health signals (usage, tickets, payments, sentiment), drive adoption and expansion, and educate users and stakeholders at scale. Doing this manually across many customers doesn't scale.",
+          "current_ai_capabilities": {
+            "platform_features": [
+              "Zuora AI explicitly includes a Customer Success Agent in the persona-specific agent set",
+              "Strategy: one Concierge Agent orchestrates domain-specific agents (Billing, Revenue, Collections, Orders, Customer Health) to deliver unified response and guidance to CS users",
+              "Zuora AI Help: Gen-AI assistance across Knowledge Center, Developer Center, Support—guiding users to answers and self-resolution as an education layer",
+              "Unified Data Platform: Gives CS a single view of Commerce + Billing + AR + Revenue data, which agents can narrate and interpret for health and success planning"
+            ],
+            "ai_agents": [
+              "Customer Success Agent: In persona-specific agent set",
+              "Customer Health Agent: Monitors signals in real time, flags churn risks, recommends actions",
+              "Zuora AI Help: Education layer for product and billing concepts"
+            ],
+            "mcp_tools": [
+              "MCP Servers expose subscriptions, invoices, usage, revenue, collections, and entitlements",
+              "Allows CS and health agents to compute health scores and generate recommended plays by reading directly from Zuora context"
+            ]
+          },
+          "how_it_works_today": "CS teams can use reporting + early health/churn agents to get account-level metrics and narratives. Use Zuora AI Help and docs-optimized content to educate both internal users and customers on product behavior.",
+          "whats_coming": {
+            "timeline": "6-12M",
+            "capabilities": [
+              "End-to-end Customer Success playbooks: CS agents that continuously monitor health and product adoption, trigger playbooks (education campaigns, success plans, EBR prep, renewal prep) via MCP-integrated tools (email, CRM, in-app messaging)",
+              "Proactive education & in-product guidance: Deeper integration of AI Help into the product and customer portals—context-aware help and education driven by actual contract and usage context; CS teams can configure AI-driven journeys instead of one-off enablement"
+            ]
+          },
+          "agent_mapping": {
+            "primary_agents": ["Customer Success Agent", "Customer Health Agent"],
+            "supporting_agents": ["Zuora AI Help", "Anantha Concierge"]
+          }
+        }
+      ]
+    }
+  ]
+}
