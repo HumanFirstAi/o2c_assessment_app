@@ -294,8 +294,8 @@ def render_capability_card(cell: Dict, row_idx: int, col_idx: int, knowledge_bas
     """Render a single capability card with I/R inputs."""
     cap_id = cell["id"]
 
-    # Get current scores (default to 5)
-    current_scores = st.session_state.interactive_scores.get(cap_id, {"importance": 5, "readiness": 5})
+    # Get current scores (default to 0 - empty/not scored)
+    current_scores = st.session_state.interactive_scores.get(cap_id, {"importance": 0, "readiness": 0})
 
     # Determine priority border color
     priority_class = get_priority_class(current_scores["importance"], current_scores["readiness"])
@@ -368,7 +368,7 @@ def render_capability_card(cell: Dict, row_idx: int, col_idx: int, knowledge_bas
         st.markdown(f'<div class="score-label-i">I</div>', unsafe_allow_html=True)
         i_score = st.number_input(
             "Importance",
-            min_value=1,
+            min_value=0,
             max_value=10,
             value=current_scores["importance"],
             key=f"i_{cap_id}_{row_idx}_{col_idx}",
@@ -380,7 +380,7 @@ def render_capability_card(cell: Dict, row_idx: int, col_idx: int, knowledge_bas
         st.markdown(f'<div class="score-label-r">R</div>', unsafe_allow_html=True)
         r_score = st.number_input(
             "Readiness",
-            min_value=1,
+            min_value=0,
             max_value=10,
             value=current_scores["readiness"],
             key=f"r_{cap_id}_{row_idx}_{col_idx}",

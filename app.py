@@ -324,8 +324,9 @@ with st.sidebar:
     st.subheader("Progress")
     if 'interactive_scores' in st.session_state and st.session_state.interactive_scores:
         scores = st.session_state.interactive_scores
+        # Only count capabilities where BOTH I and R are > 0
         completed = sum(1 for cap_id, data in scores.items()
-                       if data.get("importance") != 5 or data.get("readiness") != 5)
+                       if data.get("importance", 0) > 0 and data.get("readiness", 0) > 0)
         total = 42
         st.progress(min(completed / total, 1.0))
         st.caption(f"{completed}/{total} capabilities scored")
@@ -364,15 +365,68 @@ Each capability card allows you to enter **I** (Importance) and **R** (Readiness
 # Render the interactive grid
 interactive_scores = render_interactive_assessment(kb)
 
+# Helper functions for zero handling
+def count_zero_capabilities(scores: dict) -> int:
+    """Count capabilities with 0 in either I or R."""
+    count = 0
+    for cap_id, data in scores.items():
+        if data.get("importance", 0) == 0 or data.get("readiness", 0) == 0:
+            count += 1
+    return count
+
+
+def filter_valid_scores(scores: dict) -> dict:
+    """Filter out capabilities where either I or R is 0."""
+    return {
+        cap_id: data
+        for cap_id, data in scores.items()
+        if data.get("importance", 0) > 0 and data.get("readiness", 0) > 0
+    }
+
+
 # Generate Report button with concurrent synthesis and storage
 st.markdown("---")
 if st.button("🚀 Generate Strategic Report", type="primary", use_container_width=True):
     if not interactive_scores:
         st.error("Please fill in at least some capability scores before generating a report.")
     else:
+        # Check for zero values
+        zero_count = count_zero_capabilities(interactive_scores)
+
+        if zero_count > 0:
+            st.session_state['show_zero_warning'] = True
+            st.session_state['zero_count'] = zero_count
+        else:
+            st.session_state['confirm_generate'] = True
+
+# Show warning dialog if there are zeros
+if st.session_state.get('show_zero_warning', False):
+    st.warning(f"⚠️ You have left some values as 0. **{st.session_state['zero_count']} capabilities** with 0 in either Importance or Readiness will be ignored and not assessed.")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("❌ Cancel", use_container_width=True):
+            st.session_state['show_zero_warning'] = False
+            st.rerun()
+    with col2:
+        if st.button("✅ Continue", type="primary", use_container_width=True):
+            st.session_state['show_zero_warning'] = False
+            st.session_state['confirm_generate'] = True
+            st.rerun()
+
+# Actually generate report
+if st.session_state.get('confirm_generate', False):
+    st.session_state['confirm_generate'] = False
+
+    # Filter out zero values
+    valid_scores = filter_valid_scores(interactive_scores)
+
+    if len(valid_scores) == 0:
+        st.error("No capabilities scored. Please fill in at least one capability with both I and R values > 0.")
+    else:
         with st.spinner("🔄 Generating report with parallel synthesis... This may take 30-60 seconds."):
             # Convert to analysis format
-            scores_for_analysis = collect_scores_for_analysis(interactive_scores)
+            scores_for_analysis = collect_scores_for_analysis(valid_scores)
 
             # Log activity
             log_user_activity(user, "generate_report", {"score_count": len(scores_for_analysis)})
@@ -389,7 +443,7 @@ if st.button("🚀 Generate Strategic Report", type="primary", use_container_wid
             analysis = analyze_capabilities(scores_for_analysis, kb)
             priority_matrix = create_priority_matrix(analysis)
 
-            # Save to storage
+            # Save to storage (save all scores, not just valid ones)
             assessment_id = save_assessment(user, interactive_scores, report_md)
 
             # Log completion
