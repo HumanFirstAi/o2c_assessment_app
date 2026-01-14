@@ -45,28 +45,55 @@ if (!document.querySelector('meta[name="viewport"]')) {
 </script>
 """, height=0)
 
-# CSS for tooltip hover behavior
+# CSS for delayed hover tooltip behavior
 st.markdown("""
 <style>
-/* Tooltip hover effect */
-.tooltip-container:hover .tooltip-content {
-    display: block !important;
+/* Card hover tooltip - delayed 1 second */
+.capability-card-hover {
+    position: relative;
+}
+
+.capability-card-hover .card-tooltip {
+    visibility: hidden;
+    opacity: 0;
+    transition:
+        visibility 0s linear 1s,
+        opacity 0.3s ease 1s;
+}
+
+/* Show tooltip on hover with 1s delay */
+.capability-card-hover:hover .card-tooltip {
+    visibility: visible;
+    opacity: 1;
+    transition:
+        visibility 0s linear 1s,
+        opacity 0.3s ease 1s;
+}
+
+/* Hide immediately when mouse leaves (no delay on exit) */
+.capability-card-hover:not(:hover) .card-tooltip {
+    visibility: hidden;
+    opacity: 0;
+    transition:
+        visibility 0s linear 0s,
+        opacity 0.2s ease 0s;
 }
 
 /* Tooltip arrow */
-.tooltip-content::before {
+.card-tooltip::before {
     content: '';
     position: absolute;
     top: -8px;
-    right: 10px;
+    left: 20px;
     border-width: 0 8px 8px 8px;
     border-style: solid;
     border-color: transparent transparent #1a1a1a transparent;
 }
 
-/* Ensure tooltip stays visible when hovering over it */
-.tooltip-content:hover {
-    display: block !important;
+/* Keep tooltip visible when hovering over it */
+.card-tooltip:hover {
+    visibility: visible;
+    opacity: 1;
 }
 </style>
 """, unsafe_allow_html=True)

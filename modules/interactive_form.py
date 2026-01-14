@@ -335,55 +335,82 @@ def render_capability_card(cell: Dict, row_idx: int, col_idx: int, knowledge_bas
             -webkit-box-orient: vertical;
         ">{cell["subtitle"]}</div>'''
 
-    # Get full description for popover
+    # Get full description for hover tooltip
     full_desc = get_capability_full_description(cap_id)
+    # Escape HTML entities and newlines for inline HTML
+    full_desc_escaped = full_desc.replace('"', '&quot;').replace("'", "&#39;").replace('\n', ' ')
 
-    # Build card HTML without inline tooltip
-    card_html = f'''<div style="
-        background: white;
-        border: {border_width} solid {border_color};
-        border-radius: 4px;
-        padding: 10px;
-        height: 100px;
-        min-height: 100px;
-        max-height: 100px;
-        min-width: 140px;
+    # Unique ID for this card
+    card_id = f"card_{cap_id}"
+
+    # Build card HTML with hover tooltip
+    card_html = f'''
+    <div class="capability-card-hover" id="{card_id}" style="
+        position: relative;
+        cursor: pointer;
         margin-bottom: 4px;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
     ">
-    <div style="
-        font-weight: 600;
-        font-size: 15px;
-        color: #333;
-        line-height: 1.2;
-        margin-bottom: 4px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-    ">
-        {cell["name"]}
+        <div style="
+            background: white;
+            border: {border_width} solid {border_color};
+            border-radius: 6px;
+            padding: 10px;
+            height: 100px;
+            min-height: 100px;
+            max-height: 100px;
+            min-width: 140px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        ">
+            <div style="
+                font-weight: 600;
+                font-size: 15px;
+                color: #333;
+                line-height: 1.2;
+                margin-bottom: 4px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            ">
+                {cell["name"]}
+            </div>
+            {subtitle_html}
+        </div>
+
+        <!-- Tooltip - appears after 1s hover -->
+        <div class="card-tooltip" style="
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            top: 105%;
+            left: 0;
+            width: 300px;
+            max-width: 90vw;
+            padding: 14px;
+            background: #1a1a1a;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: normal;
+            line-height: 1.6;
+            z-index: 9999;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+            transition: visibility 0s linear 1s, opacity 0.3s ease 1s;
+        ">
+            <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">{cell["name"]}</div>
+            <div style="font-size: 11px; line-height: 1.5;">{full_desc_escaped}</div>
+        </div>
     </div>
-    {subtitle_html}
-</div>'''
+    '''
 
     # Compact container with max-width for mobile
     with st.container():
-        # Card content in columns: card + info button
-        card_col, info_col = st.columns([0.88, 0.12])
-
-        with card_col:
-            st.markdown(card_html, unsafe_allow_html=True)
-
-        with info_col:
-            # Popover that floats outside card container
-            with st.popover("ℹ️", use_container_width=True):
-                st.markdown(f"**{cell['name']}**")
-                st.write(full_desc)
+        # Render card (no separate info column needed)
+        st.markdown(card_html, unsafe_allow_html=True)
 
         # Compact inputs with max-width and spacers
         st.markdown('<div style="max-width: 280px; margin: 8px 0 16px 0;">', unsafe_allow_html=True)
