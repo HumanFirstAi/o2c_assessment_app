@@ -5,6 +5,7 @@ import json
 import os
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 from config import USER_LOGS_DIR
 from modules.admin import load_allowed_users as load_users_from_file
@@ -48,7 +49,7 @@ def is_authorized(email: str) -> bool:
     return email.lower().strip() in get_allowed_users()
 
 
-def render_login_form() -> dict | None:
+def render_login_form() -> Optional[dict]:
     """Render login form and return user info if valid."""
 
     st.markdown("""
@@ -103,7 +104,7 @@ def check_authentication() -> bool:
     return st.session_state.get("authenticated", False)
 
 
-def get_current_user() -> dict | None:
+def get_current_user() -> Optional[dict]:
     """Get current user data."""
     return st.session_state.get("user", None)
 
