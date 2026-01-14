@@ -40,7 +40,7 @@ def get_user_info(email: str) -> dict:
     for user in users:
         if user['email'].lower() == email.lower():
             return user
-    return {"email": email, "name": email.split('@')[0], "company": "Unknown"}
+    return {"email": email, "name": email.split('@')[0]}
 
 
 def is_authorized(email: str) -> bool:
@@ -65,9 +65,8 @@ def render_login_form() -> dict | None:
         col1, col2, col3 = st.columns([1, 2, 1])
 
         with col2:
-            name = st.text_input("Full Name", placeholder="John Smith")
+            name = st.text_input("Name", placeholder="John Smith")
             email = st.text_input("Email", placeholder="john.smith@company.com")
-            company = st.text_input("Company", placeholder="Acme Corp")
 
             submitted = st.form_submit_button("Continue", use_container_width=True)
 
@@ -84,7 +83,6 @@ def render_login_form() -> dict | None:
                 user_data = {
                     "name": name.strip(),
                     "email": email.strip().lower(),
-                    "company": company.strip() if company else "Unknown",
                     "login_time": datetime.now().isoformat(),
                     "session_id": hashlib.md5(f"{email}{datetime.now()}".encode()).hexdigest()[:12]
                 }
@@ -128,7 +126,6 @@ def log_user_activity(user: dict, activity: str, data: dict = None):
         "timestamp": datetime.now().isoformat(),
         "user_email": user["email"],
         "user_name": user["name"],
-        "company": user["company"],
         "session_id": user["session_id"],
         "activity": activity,
         "data": data

@@ -1,6 +1,6 @@
-name,email,company
-John Smith,john.smith@acme.com,Acme Corp
-Jane Doe,jane.doe@acme.com,Acme Corp
-Alex Johnson,alex@partner.com,Partner Inc
-Bob Wilson,bob@client.com,Client LLC
-Sarah Brown,sarah@agency.com,Agency Co
+name,email
+John Smith,john.smith@acme.com
+Jane Doe,jane.doe@acme.com
+Alex Johnson,alex@partner.com
+Bob Wilson,bob@client.com
+Sarah Brown,sarah@agency.com

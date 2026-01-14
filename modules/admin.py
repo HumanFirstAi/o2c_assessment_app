@@ -37,7 +37,6 @@ def import_users_from_csv(csv_content: str) -> tuple[int, list]:
     for i, row in enumerate(reader, start=2):
         email = row.get('email', '').strip().lower()
         name = row.get('name', '').strip()
-        company = row.get('company', '').strip()
 
         if not email:
             errors.append(f"Row {i}: Missing email")
@@ -49,8 +48,7 @@ def import_users_from_csv(csv_content: str) -> tuple[int, list]:
 
         users.append({
             "email": email,
-            "name": name or email.split('@')[0],
-            "company": company or "Unknown"
+            "name": name or email.split('@')[0]
         })
 
     if users:

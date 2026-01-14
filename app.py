@@ -293,7 +293,6 @@ with st.sidebar:
     # User info section
     st.markdown(f"**👤 {user['name']}**")
     st.caption(f"{user['email']}")
-    st.caption(f"🏢 {user['company']}")
 
     if st.button("Logout", use_container_width=True):
         logout()
@@ -338,7 +337,7 @@ with st.sidebar:
     # Export JSON
     st.subheader("Export")
     if 'interactive_scores' in st.session_state and st.session_state.interactive_scores:
-        customer_context = {"company": user['company'], "user": user['name']}
+        customer_context = {"user": user['name'], "email": user['email']}
         json_data = save_assessment_json(
             st.session_state.interactive_scores,
             customer_context
@@ -347,7 +346,7 @@ with st.sidebar:
         if st.download_button(
             label="💾 Download JSON",
             data=json_data,
-            file_name=f"O2C_Assessment_{user['company']}_{user['name']}.json",
+            file_name=f"O2C_Assessment_{user['name'].replace(' ', '_')}.json",
             mime="application/json",
             use_container_width=True
         ):
@@ -383,7 +382,7 @@ if st.button("🚀 Generate Strategic Report", type="primary", use_container_wid
             report_md = generate_report_concurrent(
                 scores=scores_for_analysis,
                 knowledge_base=kb,
-                company_name=user['company'],
+                company_name=user['name'],
                 max_workers=3
             )
 
@@ -402,7 +401,7 @@ if st.button("🚀 Generate Strategic Report", type="primary", use_container_wid
             st.session_state['analysis'] = analysis
             st.session_state['priority_matrix'] = priority_matrix
             st.session_state['assessment_id'] = assessment_id
-            st.session_state['customer_context'] = {"company": user['company'], "user": user['name']}
+            st.session_state['customer_context'] = {"user": user['name'], "email": user['email']}
 
         st.success(f"✅ Report generated and saved! (ID: {assessment_id})")
         st.rerun()

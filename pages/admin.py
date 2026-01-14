@@ -40,14 +40,12 @@ if users:
 
     # Display as table with delete buttons
     for i, user in enumerate(users):
-        col1, col2, col3, col4 = st.columns([2, 3, 2, 1])
+        col1, col2, col3 = st.columns([2, 4, 1])
         with col1:
             st.text(user.get('name', 'N/A'))
         with col2:
             st.text(user.get('email', 'N/A'))
         with col3:
-            st.text(user.get('company', 'N/A'))
-        with col4:
             if st.button("🗑️", key=f"del_{i}", help=f"Remove {user['email']}"):
                 delete_user(user['email'])
                 st.rerun()
@@ -62,9 +60,9 @@ st.subheader("📤 Upload User List (CSV)")
 st.markdown("""
 **CSV Format:**
 ```
-name,email,company
-John Smith,john@acme.com,Acme Corp
-Jane Doe,jane@acme.com,Acme Corp
+name,email
+John Smith,john@acme.com
+Jane Doe,jane@acme.com
 ```
 """)
 
@@ -115,13 +113,11 @@ st.markdown("---")
 st.subheader("➕ Add Single User")
 
 with st.form("add_user_form"):
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     with col1:
         new_name = st.text_input("Name")
     with col2:
         new_email = st.text_input("Email")
-    with col3:
-        new_company = st.text_input("Company")
 
     submitted = st.form_submit_button("Add User")
 
@@ -136,8 +132,7 @@ with st.form("add_user_form"):
             else:
                 users.append({
                     "email": new_email.lower().strip(),
-                    "name": new_name.strip() or new_email.split('@')[0],
-                    "company": new_company.strip() or "Unknown"
+                    "name": new_name.strip() or new_email.split('@')[0]
                 })
                 save_allowed_users(users)
                 st.success(f"✅ Added {new_email}")
@@ -149,9 +144,9 @@ st.markdown("---")
 st.subheader("📥 Export Current Users")
 
 if users:
-    csv_content = "name,email,company\n"
+    csv_content = "name,email\n"
     for user in users:
-        csv_content += f"{user.get('name','')},{user.get('email','')},{user.get('company','')}\n"
+        csv_content += f"{user.get('name','')},{user.get('email','')}\n"
 
     st.download_button(
         "Download as CSV",
