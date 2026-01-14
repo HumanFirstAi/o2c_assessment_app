@@ -248,7 +248,7 @@ Supporting: {', '.join(supporting) if supporting else 'None documented'}
 
 
 def format_executive_context(
-    company_name: str,
+    user_name: str,
     total_scored: int,
     urgent_gaps: List[Dict],
     critical_gaps: List[Dict],
@@ -261,7 +261,7 @@ def format_executive_context(
     phase_gap_summary = format_phase_gap_summary(urgent_gaps)
 
     return f"""
-COMPANY: {company_name}
+ASSESSMENT FOR: {user_name}
 ASSESSMENT SCOPE: {total_scored} capabilities scored (filtered for relevance)
 
 OVERALL METRICS:
@@ -524,23 +524,20 @@ def generate_strategic_report(
 
     # Add customer context if provided
     if customer_context:
-        company = customer_context.get('company', '')
-        industry = customer_context.get('industry', '')
-        business_model = customer_context.get('business_model', '')
+        user = customer_context.get('user', '')
+        email = customer_context.get('email', '')
 
-        if company or industry or business_model:
+        if user or email:
             report += "## Assessment Context\n\n"
-            if company:
-                report += f"**Company:** {company}\n\n"
-            if industry:
-                report += f"**Industry:** {industry}\n\n"
-            if business_model:
-                report += f"**Business Model:** {business_model}\n\n"
+            if user:
+                report += f"**Prepared for:** {user}\n\n"
+            if email:
+                report += f"**Email:** {email}\n\n"
             report += "---\n\n"
 
     # Section 1: Executive Summary (Claude synthesis)
-    company_name = customer_context.get('company', 'Company') if customer_context else 'Company'
-    report += generate_executive_summary(analyzed_capabilities, priority_matrix, urgent_gaps, critical_gaps, company_name)
+    user_name = customer_context.get('user', 'User') if customer_context else 'User'
+    report += generate_executive_summary(analyzed_capabilities, priority_matrix, urgent_gaps, critical_gaps, user_name)
 
     # Section 2: Priority Matrix Analysis (Template-based)
     report += generate_priority_matrix_section(priority_matrix, phase_summary)
@@ -569,7 +566,7 @@ def generate_strategic_report(
 
 def generate_executive_summary(analyzed_capabilities: List[Dict], priority_matrix: Dict,
                                urgent_gaps: List[Dict], critical_gaps: List[Dict],
-                               company_name: str = "Company") -> str:
+                               user_name: str = "User") -> str:
     """
     Generate executive summary using Claude synthesis.
     Focus on gap identification and overall readiness posture.
@@ -582,7 +579,7 @@ def generate_executive_summary(analyzed_capabilities: List[Dict], priority_matri
 
     # Format context for Claude
     exec_context = format_executive_context(
-        company_name, total_caps, urgent_gaps, critical_gaps,
+        user_name, total_caps, urgent_gaps, critical_gaps,
         avg_importance, avg_readiness
     )
 

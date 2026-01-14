@@ -45,7 +45,7 @@ def generate_priority_matrix_table(analyzed_capabilities: List[Dict]) -> str:
 def generate_report_concurrent(
     scores: List[Dict],
     knowledge_base: dict,
-    company_name: str,
+    user_name: str,
     max_workers: int = 3
 ) -> str:
     """
@@ -76,7 +76,7 @@ def generate_report_concurrent(
 
     # Executive summary task
     exec_context = format_executive_context(
-        company_name, len(analyzed), urgent_gaps, critical_gaps,
+        user_name, len(analyzed), urgent_gaps, critical_gaps,
         avg_importance, avg_readiness
     )
     tasks.append(("executive_summary", exec_context))
@@ -140,7 +140,7 @@ def generate_report_concurrent(
             urgent_sections.append(section)
 
     report = f"""# O2C AI & MCP Readiness Assessment
-## {company_name}
+**Prepared for:** {user_name}
 *Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}*
 
 ---

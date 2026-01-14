@@ -382,7 +382,7 @@ if st.button("🚀 Generate Strategic Report", type="primary", use_container_wid
             report_md = generate_report_concurrent(
                 scores=scores_for_analysis,
                 knowledge_base=kb,
-                company_name=user['name'],
+                user_name=user['name'],
                 max_workers=3
             )
 
@@ -438,14 +438,14 @@ if 'report' in st.session_state:
     col1, col2, col3 = st.columns(3)
 
     customer_ctx = st.session_state.get('customer_context', {})
-    company = st.session_state.get('company_name', 'Report')
+    user_name = customer_ctx.get('user', 'Report').replace(' ', '_')
 
     with col1:
         docx_bytes = export_to_docx(st.session_state['report'], customer_ctx)
         st.download_button(
             label="📄 Download as DOCX",
             data=docx_bytes,
-            file_name=f"O2C_Assessment_{company or 'Report'}.docx",
+            file_name=f"O2C_Assessment_{user_name}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
@@ -454,7 +454,7 @@ if 'report' in st.session_state:
         st.download_button(
             label="📑 Download as PDF",
             data=pdf_bytes,
-            file_name=f"O2C_Assessment_{company or 'Report'}.pdf",
+            file_name=f"O2C_Assessment_{user_name}.pdf",
             mime="application/pdf"
         )
 
@@ -463,6 +463,6 @@ if 'report' in st.session_state:
         st.download_button(
             label="📝 Download as Markdown",
             data=md_content,
-            file_name=f"O2C_Assessment_{company or 'Report'}.md",
+            file_name=f"O2C_Assessment_{user_name}.md",
             mime="text/markdown"
         )

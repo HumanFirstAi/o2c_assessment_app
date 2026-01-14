@@ -20,24 +20,18 @@ def export_to_docx(report_markdown: str, customer_context: Dict = None) -> bytes
 
     # Add customer context if provided
     if customer_context:
-        company = customer_context.get('company', '')
-        industry = customer_context.get('industry', '')
-        business_model = customer_context.get('business_model', '')
+        user = customer_context.get('user', '')
+        email = customer_context.get('email', '')
 
-        if company:
+        if user:
             p = doc.add_paragraph()
-            p.add_run(f'Company: ').bold = True
-            p.add_run(company)
+            p.add_run(f'Prepared for: ').bold = True
+            p.add_run(user)
 
-        if industry:
+        if email:
             p = doc.add_paragraph()
-            p.add_run(f'Industry: ').bold = True
-            p.add_run(industry)
-
-        if business_model:
-            p = doc.add_paragraph()
-            p.add_run(f'Business Model: ').bold = True
-            p.add_run(business_model)
+            p.add_run(f'Email: ').bold = True
+            p.add_run(email)
 
         doc.add_paragraph()  # Blank line
 
@@ -190,17 +184,14 @@ def export_to_pdf(report_markdown: str, customer_context: Dict = None) -> bytes:
 
         # Add customer context
         if customer_context:
-            company = customer_context.get('company', '')
-            industry = customer_context.get('industry', '')
-            business_model = customer_context.get('business_model', '')
+            user = customer_context.get('user', '')
+            email = customer_context.get('email', '')
 
             full_html += '<div class="customer-info">'
-            if company:
-                full_html += f'<p><strong>Company:</strong> {company}</p>'
-            if industry:
-                full_html += f'<p><strong>Industry:</strong> {industry}</p>'
-            if business_model:
-                full_html += f'<p><strong>Business Model:</strong> {business_model}</p>'
+            if user:
+                full_html += f'<p><strong>Prepared for:</strong> {user}</p>'
+            if email:
+                full_html += f'<p><strong>Email:</strong> {email}</p>'
             full_html += '</div>'
 
         full_html += html_content
@@ -230,16 +221,13 @@ def export_to_markdown(report_markdown: str, customer_context: Dict = None) -> s
     output = "# O2C AI Agent & MCP Readiness Assessment\n\n"
 
     if customer_context:
-        company = customer_context.get('company', '')
-        industry = customer_context.get('industry', '')
-        business_model = customer_context.get('business_model', '')
+        user = customer_context.get('user', '')
+        email = customer_context.get('email', '')
 
-        if company:
-            output += f"**Company:** {company}\n\n"
-        if industry:
-            output += f"**Industry:** {industry}\n\n"
-        if business_model:
-            output += f"**Business Model:** {business_model}\n\n"
+        if user:
+            output += f"**Prepared for:** {user}\n\n"
+        if email:
+            output += f"**Email:** {email}\n\n"
 
         output += "---\n\n"
 
