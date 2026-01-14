@@ -7,8 +7,9 @@ from datetime import datetime
 from pathlib import Path
 
 from config import USER_LOGS_DIR
+from modules.admin import load_allowed_users as load_users_from_file
 
-# Allowed users - add emails here
+# Allowed users - fallback if no file uploaded
 ALLOWED_USERS = [
     "john.smith@company.com",
     "jane.doe@company.com",
@@ -16,13 +17,30 @@ ALLOWED_USERS = [
     # Add more emails as needed
 ]
 
-# Or load from environment variable (comma-separated)
+# Load from uploaded users file or environment variable
 def get_allowed_users() -> list:
-    """Get allowed users from env or default list."""
+    """Get allowed user emails from uploaded file, env, or fallback list."""
+    # First try: uploaded users file
+    users = load_users_from_file()
+    if users:
+        return [u['email'].lower() for u in users]
+
+    # Second try: environment variable
     env_users = os.getenv("ALLOWED_USERS", "")
     if env_users:
         return [email.strip().lower() for email in env_users.split(",")]
+
+    # Fallback: default list
     return [email.lower() for email in ALLOWED_USERS]
+
+
+def get_user_info(email: str) -> dict:
+    """Get full user info from allowed list."""
+    users = load_users_from_file()
+    for user in users:
+        if user['email'].lower() == email.lower():
+            return user
+    return {"email": email, "name": email.split('@')[0], "company": "Unknown"}
 
 
 def is_authorized(email: str) -> bool:

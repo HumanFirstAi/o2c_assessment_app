@@ -57,6 +57,16 @@ if os.path.exists(config.USER_DATA_DIR):
 else:
     print(f"⚠️ Storage not found: {config.USER_DATA_DIR}")
 
+# Check if users have been configured
+from modules.admin import is_users_file_exists
+
+if not is_users_file_exists():
+    st.warning("⚠️ No users configured yet.")
+    st.info("An admin needs to upload the user list first.")
+    st.markdown("### [→ Go to Admin Page](/admin)")
+    st.markdown("Upload a CSV file with user emails to enable access.")
+    st.stop()
+
 # Authentication gate
 if not check_authentication():
     render_login_form()
