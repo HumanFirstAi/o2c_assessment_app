@@ -47,7 +47,7 @@ def render_interactive_assessment(knowledge_base: dict) -> Dict:
         min-height: 100px;
         max-height: 100px;
         overflow: hidden;
-        font-size: 9px;
+        font-size: 12px;
         color: #333 !important;
     }
     .empty-card {
@@ -55,7 +55,7 @@ def render_interactive_assessment(knowledge_base: dict) -> Dict:
     }
     .cap-name {
         font-weight: bold;
-        font-size: 11px;
+        font-size: 15px;
         margin-bottom: 4px;
         line-height: 1.3;
         color: #333 !important;
@@ -63,7 +63,7 @@ def render_interactive_assessment(knowledge_base: dict) -> Dict:
     .cap-subtitle {
         font-style: italic;
         color: #888 !important;
-        font-size: 9px;
+        font-size: 12px;
         margin-bottom: 5px;
     }
     .score-label-i {
@@ -117,7 +117,7 @@ def render_interactive_assessment(knowledge_base: dict) -> Dict:
             min-height: 120px;
             max-height: none;
             padding: 12px;
-            font-size: 11px;
+            font-size: 15px;
         }
         .cap-name {
             font-size: 14px;
@@ -313,7 +313,7 @@ def render_capability_card(cell: Dict, row_idx: int, col_idx: int, knowledge_bas
     subtitle_html = ""
     if cell.get("subtitle"):
         subtitle_html = f'''<div style="
-            font-size: 9px;
+            font-size: 12px;
             color: #888;
             font-style: italic;
             line-height: 1.2;
@@ -343,7 +343,7 @@ def render_capability_card(cell: Dict, row_idx: int, col_idx: int, knowledge_bas
     ">
     <div style="
         font-weight: 600;
-        font-size: 11px;
+        font-size: 15px;
         color: #333;
         line-height: 1.2;
         margin-bottom: 4px;

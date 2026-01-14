@@ -358,8 +358,7 @@ with st.sidebar:
 st.markdown("---")
 st.header("📝 Interactive Assessment")
 st.markdown("""
-Fill out the assessment directly using the 8×7 grid below. Each capability card allows you to enter
-**I** (Importance) and **R** (Readiness) scores from 1-10.
+Each capability card allows you to enter **I** (Importance) and **R** (Readiness) scores from 1-10.
 """)
 
 # Render the interactive grid
@@ -429,6 +428,14 @@ if 'report' in st.session_state:
                 st.metric(cat.replace("_", " ").title(), f"{color} {count}")
 
     # Full Report
+    st.markdown("""
+    <style>
+    /* Report paragraphs max width for better readability */
+    .stMarkdown p {
+        max-width: 600px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     st.markdown(st.session_state['report'])
 
     # Export Options
