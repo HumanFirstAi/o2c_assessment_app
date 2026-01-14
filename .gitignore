@@ -64,3 +64,8 @@ exports/
 
 # Railway deployment
 .railway/
+
+# Local development storage (Railway uses /data volume)
+local_data/
+user_logs/
+user_data/

@@ -1,0 +1,122 @@
+# modules/auth.py
+import streamlit as st
+import hashlib
+import json
+import os
+from datetime import datetime
+from pathlib import Path
+
+from config import USER_LOGS_DIR
+
+# Allowed users - add emails here
+ALLOWED_USERS = [
+    "john.smith@company.com",
+    "jane.doe@company.com",
+    "alex.johnson@company.com",
+    # Add more emails as needed
+]
+
+# Or load from environment variable (comma-separated)
+def get_allowed_users() -> list:
+    """Get allowed users from env or default list."""
+    env_users = os.getenv("ALLOWED_USERS", "")
+    if env_users:
+        return [email.strip().lower() for email in env_users.split(",")]
+    return [email.lower() for email in ALLOWED_USERS]
+
+
+def is_authorized(email: str) -> bool:
+    """Check if email is in allowed list."""
+    return email.lower().strip() in get_allowed_users()
+
+
+def render_login_form() -> dict | None:
+    """Render login form and return user info if valid."""
+
+    st.markdown("""
+    <div style="max-width: 400px; margin: 100px auto; padding: 40px;
+                background: #1e1e1e; border-radius: 10px; border: 1px solid #333;">
+        <h2 style="text-align: center; margin-bottom: 20px;">🔐 O2C Assessment</h2>
+        <p style="text-align: center; color: #888; margin-bottom: 30px;">
+            Please enter your details to continue
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    with st.form("login_form"):
+        col1, col2, col3 = st.columns([1, 2, 1])
+
+        with col2:
+            name = st.text_input("Full Name", placeholder="John Smith")
+            email = st.text_input("Email", placeholder="john.smith@company.com")
+            company = st.text_input("Company", placeholder="Acme Corp")
+
+            submitted = st.form_submit_button("Continue", use_container_width=True)
+
+            if submitted:
+                if not name or not email:
+                    st.error("Please enter both name and email")
+                    return None
+
+                if not is_authorized(email):
+                    st.error("⚠️ Email not authorized. Contact your administrator.")
+                    return None
+
+                # Store user session
+                user_data = {
+                    "name": name.strip(),
+                    "email": email.strip().lower(),
+                    "company": company.strip() if company else "Unknown",
+                    "login_time": datetime.now().isoformat(),
+                    "session_id": hashlib.md5(f"{email}{datetime.now()}".encode()).hexdigest()[:12]
+                }
+
+                st.session_state["user"] = user_data
+                st.session_state["authenticated"] = True
+
+                # Log login
+                log_user_activity(user_data, "login")
+
+                st.rerun()
+
+    return None
+
+
+def check_authentication() -> bool:
+    """Check if user is authenticated."""
+    return st.session_state.get("authenticated", False)
+
+
+def get_current_user() -> dict | None:
+    """Get current user data."""
+    return st.session_state.get("user", None)
+
+
+def logout():
+    """Clear user session."""
+    if "user" in st.session_state:
+        log_user_activity(st.session_state["user"], "logout")
+    st.session_state["authenticated"] = False
+    st.session_state["user"] = None
+    st.rerun()
+
+
+def log_user_activity(user: dict, activity: str, data: dict = None):
+    """Log user activity to Railway Volume."""
+    log_dir = Path(USER_LOGS_DIR)
+    log_dir.mkdir(exist_ok=True)
+
+    log_entry = {
+        "timestamp": datetime.now().isoformat(),
+        "user_email": user["email"],
+        "user_name": user["name"],
+        "company": user["company"],
+        "session_id": user["session_id"],
+        "activity": activity,
+        "data": data
+    }
+
+    # Append to daily log file
+    log_file = log_dir / f"activity_{datetime.now().strftime('%Y-%m-%d')}.jsonl"
+    with open(log_file, "a") as f:
+        f.write(json.dumps(log_entry) + "\n")

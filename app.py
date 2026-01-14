@@ -6,6 +6,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from modules.auth import (
+    check_authentication,
+    render_login_form,
+    get_current_user,
+    logout,
+    log_user_activity
+)
+from modules.storage import save_assessment, get_user_assessments, load_assessment
 from modules.interactive_form import (
     render_interactive_assessment,
     save_assessment_json,
@@ -13,6 +21,7 @@ from modules.interactive_form import (
 )
 from modules.score_analyzer import analyze_capabilities, create_priority_matrix
 from modules.report_generator import generate_strategic_report
+from modules.concurrent_generator import generate_report_concurrent
 from modules.export_handler import export_to_docx, export_to_pdf, export_to_markdown
 from grid_layout import GRID_LAYOUT
 
@@ -40,6 +49,21 @@ if (!document.querySelector('meta[name="viewport"]')) {
 if not os.getenv("ANTHROPIC_API_KEY"):
     st.error("⚠️ ANTHROPIC_API_KEY not configured. Set it in Railway dashboard or environment.")
     st.stop()
+
+# Verify storage on startup
+import config
+if os.path.exists(config.USER_DATA_DIR):
+    print(f"✅ Storage mounted: {config.USER_DATA_DIR}")
+else:
+    print(f"⚠️ Storage not found: {config.USER_DATA_DIR}")
+
+# Authentication gate
+if not check_authentication():
+    render_login_form()
+    st.stop()
+
+# User is authenticated
+user = get_current_user()
 
 
 def init_test_mode():
@@ -254,46 +278,70 @@ Transform your O2C assessment into an intelligent, AI-powered strategic roadmap.
 Complete the interactive grid below to score each capability.
 """)
 
-# Sidebar - simplified
+# Sidebar with user info
 with st.sidebar:
-    st.header("Assessment")
+    # User info section
+    st.markdown(f"**👤 {user['name']}**")
+    st.caption(f"{user['email']}")
+    st.caption(f"🏢 {user['company']}")
 
-    # Company name for report header
-    test_type = st.query_params.get("test")
-    default_company = f"Test Company ({test_type})" if test_type else ""
-    company_name = st.text_input("Company Name", value=default_company, placeholder="Acme Corp")
+    if st.button("Logout", use_container_width=True):
+        logout()
+
+    st.divider()
+
+    # Previous assessments
+    st.subheader("📁 Your Assessments")
+    assessments = get_user_assessments(user['email'])
+
+    if assessments:
+        for assessment in assessments[:5]:  # Show last 5
+            timestamp = assessment['timestamp'][:10]
+            if st.button(f"📄 {timestamp}", key=assessment['id'], use_container_width=True):
+                # Load previous assessment
+                loaded = load_assessment(user['email'], assessment['id'])
+                if loaded:
+                    st.session_state['interactive_scores'] = loaded['scores']
+                    if 'report' in loaded:
+                        st.session_state['report'] = loaded['report']
+                    st.toast(f"✅ Loaded assessment from {timestamp}", icon="📄")
+                    st.rerun()
+    else:
+        st.caption("No previous assessments")
+
+    st.divider()
 
     # Progress tracking
+    st.subheader("Progress")
     if 'interactive_scores' in st.session_state and st.session_state.interactive_scores:
-        st.divider()
-        st.subheader("Progress")
         scores = st.session_state.interactive_scores
         completed = sum(1 for cap_id, data in scores.items()
                        if data.get("importance") != 5 or data.get("readiness") != 5)
         total = 42
         st.progress(min(completed / total, 1.0))
         st.caption(f"{completed}/{total} capabilities scored")
+    else:
+        st.caption("Start scoring capabilities below")
 
-    # Save/Export functionality
     st.divider()
-    st.subheader("Export")
 
+    # Export JSON
+    st.subheader("Export")
     if 'interactive_scores' in st.session_state and st.session_state.interactive_scores:
-        customer_context = {"company": company_name}
+        customer_context = {"company": user['company'], "user": user['name']}
         json_data = save_assessment_json(
             st.session_state.interactive_scores,
             customer_context
         )
 
         if st.download_button(
-            label="💾 Save Assessment",
+            label="💾 Download JSON",
             data=json_data,
-            file_name=f"O2C_Assessment_{company_name or 'Progress'}.json",
+            file_name=f"O2C_Assessment_{user['company']}_{user['name']}.json",
             mime="application/json",
-            use_container_width=True,
-            help="Download your assessment progress as JSON"
+            use_container_width=True
         ):
-            st.toast("✅ Assessment saved!", icon="💾")
+            st.toast("✅ JSON downloaded!", icon="💾")
 
 # ============================================================================
 # INTERACTIVE ASSESSMENT
@@ -308,38 +356,45 @@ Fill out the assessment directly using the 8×7 grid below. Each capability card
 # Render the interactive grid
 interactive_scores = render_interactive_assessment(kb)
 
-# Generate Report button for interactive mode
+# Generate Report button with concurrent synthesis and storage
 st.markdown("---")
 if st.button("🚀 Generate Strategic Report", type="primary", use_container_width=True):
     if not interactive_scores:
         st.error("Please fill in at least some capability scores before generating a report.")
     else:
-        # Prepare customer context
-        customer_context = {"company": company_name}
-
-        with st.spinner("Analyzing capabilities and generating report..."):
+        with st.spinner("🔄 Generating report with parallel synthesis... This may take 30-60 seconds."):
             # Convert to analysis format
             scores_for_analysis = collect_scores_for_analysis(interactive_scores)
 
-            # Analyze
+            # Log activity
+            log_user_activity(user, "generate_report", {"score_count": len(scores_for_analysis)})
+
+            # Generate report with concurrent synthesis
+            report_md = generate_report_concurrent(
+                scores=scores_for_analysis,
+                knowledge_base=kb,
+                company_name=user['company'],
+                max_workers=3
+            )
+
+            # Analyze for priority matrix
             analysis = analyze_capabilities(scores_for_analysis, kb)
             priority_matrix = create_priority_matrix(analysis)
 
-            # Generate report
-            report_md = generate_strategic_report(
-                scores=scores_for_analysis,
-                knowledge_base=kb,
-                customer_context=customer_context
-            )
+            # Save to storage
+            assessment_id = save_assessment(user, interactive_scores, report_md)
+
+            # Log completion
+            log_user_activity(user, "report_complete", {"assessment_id": assessment_id})
 
             # Store in session state
             st.session_state['report'] = report_md
             st.session_state['analysis'] = analysis
             st.session_state['priority_matrix'] = priority_matrix
-            st.session_state['customer_context'] = customer_context
-            st.session_state['company_name'] = company_name
+            st.session_state['assessment_id'] = assessment_id
+            st.session_state['customer_context'] = {"company": user['company'], "user": user['name']}
 
-        st.success("✅ Report generated! Scroll down to view.")
+        st.success(f"✅ Report generated and saved! (ID: {assessment_id})")
         st.rerun()
 
 
