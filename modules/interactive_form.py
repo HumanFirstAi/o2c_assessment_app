@@ -261,32 +261,41 @@ def render_interactive_assessment(knowledge_base: dict) -> Dict:
 
     st.markdown("---")
 
-    # Mobile-responsive layout: group by phase
-    # On desktop: shows multiple columns, on mobile: stacks vertically
-    for phase in PHASES:
-        # Phase header (full width)
-        st.markdown(f'''
-        <div style="
-            background: {phase['color']};
-            color: {phase.get('text_color', 'white')};
-            padding: 14px;
-            text-align: center;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 15px;
-            margin: 24px 0 12px 0;
-        ">
-            {phase['name']}
-        </div>
-        ''', unsafe_allow_html=True)
+    # Desktop 8-column grid layout (auto-stacks on mobile)
+    # Phase headers
+    header_cols = st.columns(8, gap="small")
+    for idx, phase in enumerate(PHASES):
+        with header_cols[idx]:
+            st.markdown(f'''
+            <div style="
+                background: {phase['color']};
+                color: {phase.get('text_color', 'white')};
+                padding: 12px 4px;
+                text-align: center;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 11px;
+                min-height: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            ">
+                {phase['name']}
+            </div>
+            ''', unsafe_allow_html=True)
 
-        # Get capabilities for this phase
-        capabilities = get_capabilities_by_phase(phase['id'])
+    st.write("")  # Small gap
 
-        # Render cards in responsive columns
-        # Desktop: 3-4 cards per row, Mobile: stacks automatically
-        for cap in capabilities:
-            render_capability_card(cap, 0, 0, knowledge_base)
+    # Render grid rows
+    for row_idx, row in enumerate(GRID_LAYOUT):
+        row_cols = st.columns(8, gap="small")
+        for col_idx, cell in enumerate(row):
+            with row_cols[col_idx]:
+                if cell is None:
+                    # Empty cell
+                    st.markdown('<div style="height: 120px;"></div>', unsafe_allow_html=True)
+                else:
+                    render_capability_card(cell, row_idx, col_idx, knowledge_base)
 
     # Feedback loop footer
     st.markdown("---")
@@ -335,112 +344,68 @@ def render_capability_card(cell: Dict, row_idx: int, col_idx: int, knowledge_bas
             -webkit-box-orient: vertical;
         ">{cell["subtitle"]}</div>'''
 
-    # Get full description for hover tooltip
+    # Get full description for tooltip
     full_desc = get_capability_full_description(cap_id)
-    # Escape HTML entities and newlines for inline HTML
-    full_desc_escaped = full_desc.replace('"', '&quot;').replace("'", "&#39;").replace('\n', ' ')
 
-    # Unique ID for this card
-    card_id = f"card_{cap_id}"
-
-    # Build card HTML with hover tooltip
-    card_html = f'''
-    <div class="capability-card-hover" id="{card_id}" style="
-        position: relative;
-        cursor: pointer;
+    # Simple card HTML - no complex tooltip
+    card_html = f'''<div style="
+        background: white;
+        border: {border_width} solid {border_color};
+        border-radius: 6px;
+        padding: 8px;
+        height: 90px;
+        min-height: 90px;
+        overflow: hidden;
         margin-bottom: 4px;
     ">
         <div style="
-            background: white;
-            border: {border_width} solid {border_color};
-            border-radius: 6px;
-            padding: 10px;
-            height: 100px;
-            min-height: 100px;
-            max-height: 100px;
-            min-width: 140px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+            line-height: 1.2;
+            margin-bottom: 3px;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         ">
-            <div style="
-                font-weight: 600;
-                font-size: 15px;
-                color: #333;
-                line-height: 1.2;
-                margin-bottom: 4px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-            ">
-                {cell["name"]}
-            </div>
-            {subtitle_html}
+            {cell["name"]}
         </div>
+        {subtitle_html}
+    </div>'''
 
-        <!-- Tooltip - appears after 1s hover -->
-        <div class="card-tooltip" style="
-            visibility: hidden;
-            opacity: 0;
-            position: absolute;
-            top: 105%;
-            left: 0;
-            width: 300px;
-            max-width: 90vw;
-            padding: 14px;
-            background: #1a1a1a;
-            color: #fff;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: normal;
-            line-height: 1.6;
-            z-index: 9999;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-            transition: visibility 0s linear 1s, opacity 0.3s ease 1s;
-        ">
-            <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">{cell["name"]}</div>
-            <div style="font-size: 11px; line-height: 1.5;">{full_desc_escaped}</div>
-        </div>
-    </div>
-    '''
+    # Render card
+    st.markdown(card_html, unsafe_allow_html=True)
 
-    # Compact container with max-width for mobile
-    with st.container():
-        # Render card (no separate info column needed)
-        st.markdown(card_html, unsafe_allow_html=True)
+    # Info button with native Streamlit tooltip
+    if st.button("ℹ️", key=f"info_{cap_id}_{row_idx}_{col_idx}", help=full_desc, type="secondary"):
+        pass  # Button click does nothing, tooltip shows on hover
 
-        # Compact inputs with max-width and spacers
-        st.markdown('<div style="max-width: 280px; margin: 8px 0 16px 0;">', unsafe_allow_html=True)
+    # Score inputs in two columns (compact)
+    input_col1, input_col2 = st.columns(2)
 
-        # Score inputs in two columns (compact)
-        spacer1, input_col1, input_col2, spacer2 = st.columns([0.05, 0.4, 0.4, 0.15])
+    with input_col1:
+        st.markdown(f'<div class="score-label-i" style="font-size: 11px; font-weight: bold; color: #E6007E; margin-bottom: 2px;">I</div>', unsafe_allow_html=True)
+        i_score = st.number_input(
+            "Importance",
+            min_value=0,
+            max_value=10,
+            value=current_scores["importance"],
+            key=f"i_{cap_id}_{row_idx}_{col_idx}",
+            label_visibility="collapsed"
+        )
 
-        with input_col1:
-            st.markdown(f'<div class="score-label-i" style="font-size: 11px; font-weight: bold; color: #E6007E; margin-bottom: 2px;">I</div>', unsafe_allow_html=True)
-            i_score = st.number_input(
-                "Importance",
-                min_value=0,
-                max_value=10,
-                value=current_scores["importance"],
-                key=f"i_{cap_id}_{row_idx}_{col_idx}",
-                label_visibility="collapsed"
-            )
-
-        with input_col2:
-            st.markdown(f'<div class="score-label-r" style="font-size: 11px; font-weight: bold; color: #00838F; margin-bottom: 2px;">R</div>', unsafe_allow_html=True)
-            r_score = st.number_input(
-                "Readiness",
-                min_value=0,
-                max_value=10,
-                value=current_scores["readiness"],
-                key=f"r_{cap_id}_{row_idx}_{col_idx}",
-                label_visibility="collapsed"
-            )
-
-        st.markdown('</div>', unsafe_allow_html=True)
+    with input_col2:
+        st.markdown(f'<div class="score-label-r" style="font-size: 11px; font-weight: bold; color: #00838F; margin-bottom: 2px;">R</div>', unsafe_allow_html=True)
+        r_score = st.number_input(
+            "Readiness",
+            min_value=0,
+            max_value=10,
+            value=current_scores["readiness"],
+            key=f"r_{cap_id}_{row_idx}_{col_idx}",
+            label_visibility="collapsed"
+        )
 
     # Update session state
     st.session_state.interactive_scores[cap_id] = {
