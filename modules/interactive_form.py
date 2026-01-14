@@ -2,7 +2,7 @@ import streamlit as st
 import json
 from datetime import datetime
 from typing import Dict, List, Tuple
-from grid_layout import GRID_LAYOUT, PHASES, get_all_capabilities, IMPORTANCE_STYLE, READINESS_STYLE, get_capability_full_description
+from grid_layout import GRID_LAYOUT, PHASES, get_all_capabilities, IMPORTANCE_STYLE, READINESS_STYLE, get_capability_full_description, get_capabilities_by_phase
 
 def render_interactive_assessment(knowledge_base: dict) -> Dict:
     """
@@ -101,6 +101,12 @@ def render_interactive_assessment(knowledge_base: dict) -> Dict:
         text-align: center;
         padding: 8px;
         min-height: 44px;
+    }
+
+    /* Compact input container */
+    .compact-input-container {
+        max-width: 280px;
+        margin: 8px 0 16px 0;
     }
 
     /* Responsive adjustments */
@@ -255,28 +261,32 @@ def render_interactive_assessment(knowledge_base: dict) -> Dict:
 
     st.markdown("---")
 
-    # Render phase headers
-    header_cols = st.columns(8)
-    for i, phase in enumerate(PHASES):
-        with header_cols[i]:
-            st.markdown(
-                f'<div class="phase-header" style="background-color: {phase["color"]}; color: {phase["text_color"]}">'
-                f'{phase["name"]}</div>',
-                unsafe_allow_html=True
-            )
+    # Mobile-responsive layout: group by phase
+    # On desktop: shows multiple columns, on mobile: stacks vertically
+    for phase in PHASES:
+        # Phase header (full width)
+        st.markdown(f'''
+        <div style="
+            background: {phase['color']};
+            color: {phase.get('text_color', 'white')};
+            padding: 14px;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            margin: 24px 0 12px 0;
+        ">
+            {phase['name']}
+        </div>
+        ''', unsafe_allow_html=True)
 
-    st.write("")  # Small gap
+        # Get capabilities for this phase
+        capabilities = get_capabilities_by_phase(phase['id'])
 
-    # Render grid rows
-    for row_idx, row in enumerate(GRID_LAYOUT):
-        cols = st.columns(8)
-        for col_idx, cell in enumerate(row):
-            with cols[col_idx]:
-                if cell is None:
-                    # Empty cell
-                    st.markdown('<div class="empty-card">—</div>', unsafe_allow_html=True)
-                else:
-                    render_capability_card(cell, row_idx, col_idx, knowledge_base)
+        # Render cards in responsive columns
+        # Desktop: 3-4 cards per row, Mobile: stacks automatically
+        for cap in capabilities:
+            render_capability_card(cap, 0, 0, knowledge_base)
 
     # Feedback loop footer
     st.markdown("---")
@@ -361,44 +371,49 @@ def render_capability_card(cell: Dict, row_idx: int, col_idx: int, knowledge_bas
     {subtitle_html}
 </div>'''
 
-    # Card content in columns: card + info button
-    card_col, info_col = st.columns([0.88, 0.12])
+    # Compact container with max-width for mobile
+    with st.container():
+        # Card content in columns: card + info button
+        card_col, info_col = st.columns([0.88, 0.12])
 
-    with card_col:
-        st.markdown(card_html, unsafe_allow_html=True)
+        with card_col:
+            st.markdown(card_html, unsafe_allow_html=True)
 
-    with info_col:
-        # Popover that floats outside card container
-        with st.popover("ℹ️", use_container_width=True):
-            st.markdown(f"**{cell['name']}**")
-            st.write(full_desc)
+        with info_col:
+            # Popover that floats outside card container
+            with st.popover("ℹ️", use_container_width=True):
+                st.markdown(f"**{cell['name']}**")
+                st.write(full_desc)
 
-    # Score inputs in two columns
-    score_cols = st.columns(2)
+        # Compact inputs with max-width and spacers
+        st.markdown('<div style="max-width: 280px; margin: 8px 0 16px 0;">', unsafe_allow_html=True)
 
-    with score_cols[0]:
-        st.markdown(f'<div class="score-label-i">I</div>', unsafe_allow_html=True)
-        i_score = st.number_input(
-            "Importance",
-            min_value=0,
-            max_value=10,
-            value=current_scores["importance"],
-            key=f"i_{cap_id}_{row_idx}_{col_idx}",
-            label_visibility="collapsed",
-            help=get_capability_tooltip(cap_id, knowledge_base)
-        )
+        # Score inputs in two columns (compact)
+        spacer1, input_col1, input_col2, spacer2 = st.columns([0.05, 0.4, 0.4, 0.15])
 
-    with score_cols[1]:
-        st.markdown(f'<div class="score-label-r">R</div>', unsafe_allow_html=True)
-        r_score = st.number_input(
-            "Readiness",
-            min_value=0,
-            max_value=10,
-            value=current_scores["readiness"],
-            key=f"r_{cap_id}_{row_idx}_{col_idx}",
-            label_visibility="collapsed",
-            help=get_capability_tooltip(cap_id, knowledge_base)
-        )
+        with input_col1:
+            st.markdown(f'<div class="score-label-i" style="font-size: 11px; font-weight: bold; color: #E6007E; margin-bottom: 2px;">I</div>', unsafe_allow_html=True)
+            i_score = st.number_input(
+                "Importance",
+                min_value=0,
+                max_value=10,
+                value=current_scores["importance"],
+                key=f"i_{cap_id}_{row_idx}_{col_idx}",
+                label_visibility="collapsed"
+            )
+
+        with input_col2:
+            st.markdown(f'<div class="score-label-r" style="font-size: 11px; font-weight: bold; color: #00838F; margin-bottom: 2px;">R</div>', unsafe_allow_html=True)
+            r_score = st.number_input(
+                "Readiness",
+                min_value=0,
+                max_value=10,
+                value=current_scores["readiness"],
+                key=f"r_{cap_id}_{row_idx}_{col_idx}",
+                label_visibility="collapsed"
+            )
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # Update session state
     st.session_state.interactive_scores[cap_id] = {
