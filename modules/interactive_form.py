@@ -325,12 +325,10 @@ def render_capability_card(cell: Dict, row_idx: int, col_idx: int, knowledge_bas
             -webkit-box-orient: vertical;
         ">{cell["subtitle"]}</div>'''
 
-    # Get full description for tooltip
+    # Get full description for popover
     full_desc = get_capability_full_description(cap_id)
-    # Escape quotes for HTML attribute
-    full_desc_escaped = full_desc.replace('"', '&quot;').replace("'", "&#39;")
 
-    # Build complete card HTML as single string with consistent sizing
+    # Build card HTML without inline tooltip
     card_html = f'''<div style="
         background: white;
         border: {border_width} solid {border_color};
@@ -345,50 +343,35 @@ def render_capability_card(cell: Dict, row_idx: int, col_idx: int, knowledge_bas
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
-        position: relative;
     ">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
-        <div style="
-            font-weight: 600;
-            font-size: 15px;
-            color: #333;
-            line-height: 1.2;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            flex: 1;
-        ">
-            {cell["name"]}
-        </div>
-        <div class="tooltip-container" style="position: relative; cursor: help; flex-shrink: 0;">
-            <span style="font-size: 14px; color: #888; margin-left: 4px;">ℹ️</span>
-            <div class="tooltip-content" style="
-                display: none;
-                position: absolute;
-                right: 0;
-                top: 20px;
-                width: 320px;
-                padding: 14px;
-                background: #1a1a1a;
-                color: #fff;
-                border-radius: 8px;
-                font-size: 13px;
-                font-weight: normal;
-                line-height: 1.6;
-                z-index: 1000;
-                box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-            ">
-                {full_desc_escaped}
-            </div>
-        </div>
+    <div style="
+        font-weight: 600;
+        font-size: 15px;
+        color: #333;
+        line-height: 1.2;
+        margin-bottom: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    ">
+        {cell["name"]}
     </div>
     {subtitle_html}
 </div>'''
 
-    # Single markdown call with complete HTML
-    st.markdown(card_html, unsafe_allow_html=True)
+    # Card content in columns: card + info button
+    card_col, info_col = st.columns([0.88, 0.12])
+
+    with card_col:
+        st.markdown(card_html, unsafe_allow_html=True)
+
+    with info_col:
+        # Popover that floats outside card container
+        with st.popover("ℹ️", use_container_width=True):
+            st.markdown(f"**{cell['name']}**")
+            st.write(full_desc)
 
     # Score inputs in two columns
     score_cols = st.columns(2)
