@@ -45,6 +45,32 @@ if (!document.querySelector('meta[name="viewport"]')) {
 </script>
 """, height=0)
 
+# CSS for tooltip hover behavior
+st.markdown("""
+<style>
+/* Tooltip hover effect */
+.tooltip-container:hover .tooltip-content {
+    display: block !important;
+}
+
+/* Tooltip arrow */
+.tooltip-content::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 10px;
+    border-width: 0 8px 8px 8px;
+    border-style: solid;
+    border-color: transparent transparent #1a1a1a transparent;
+}
+
+/* Ensure tooltip stays visible when hovering over it */
+.tooltip-content:hover {
+    display: block !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # Verify API key on startup
 if not os.getenv("ANTHROPIC_API_KEY"):
     st.error("⚠️ ANTHROPIC_API_KEY not configured. Set it in Railway dashboard or environment.")
