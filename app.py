@@ -22,7 +22,7 @@ from modules.interactive_form import (
 from modules.score_analyzer import analyze_capabilities, create_priority_matrix
 from modules.report_generator import generate_strategic_report
 from modules.concurrent_generator import generate_report_concurrent
-from modules.export_handler import export_to_docx, export_to_pdf, export_to_markdown
+from modules.export_handler import export_to_docx, export_to_markdown
 from grid_layout import GRID_LAYOUT
 
 # Page config - responsive settings
@@ -568,7 +568,7 @@ if 'report' in st.session_state:
     <style>
     /* Report paragraphs max width for better readability */
     .stMarkdown p {
-        max-width: 600px;
+        max-width: 610px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -581,7 +581,7 @@ if 'report' in st.session_state:
         st.divider()
         st.header("📥 Export Report")
 
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
 
         customer_ctx = st.session_state.get('customer_context', {})
         user_name = customer_ctx.get('user', 'Report').replace(' ', '_')
@@ -596,15 +596,6 @@ if 'report' in st.session_state:
             )
 
         with col2:
-            pdf_bytes = export_to_pdf(report_content, customer_ctx)
-            st.download_button(
-                label="📑 Download as PDF",
-                data=pdf_bytes,
-                file_name=f"O2C_Assessment_{user_name}.pdf",
-                mime="application/pdf"
-            )
-
-        with col3:
             md_content = export_to_markdown(report_content, customer_ctx)
             st.download_button(
                 label="📝 Download as Markdown",
