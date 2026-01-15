@@ -52,22 +52,38 @@ def sanitize_branding(text: str) -> str:
 def fix_bullet_formatting(text: str) -> str:
     """
     Force bullets onto separate lines.
-    Handles: "• Item 1 • Item 2" -> "• Item 1\n• Item 2"
+    Handles: "Text: • Item 1 • Item 2" -> "Text:\n• Item 1\n• Item 2"
+    Preserves text before the first bullet.
     """
     # First, normalize any weird bullet characters
     text = text.replace('●', '•').replace('○', '•')
 
-    # Split on bullet and rejoin with newlines
-    # This handles: "• A • B • C" -> "• A\n• B\n• C"
-    parts = re.split(r'\s*•\s*', text)
+    # Check if there are any bullets
+    if '•' not in text:
+        return text
 
-    # Filter empty parts and rejoin
+    # Find the position of the first bullet
+    first_bullet_idx = text.find('•')
+
+    # Split into prefix (before first bullet) and bullet content
+    prefix = text[:first_bullet_idx].strip()
+    bullet_content = text[first_bullet_idx:]
+
+    # Split on bullets
+    parts = re.split(r'\s*•\s*', bullet_content)
+
+    # Filter empty parts and strip whitespace
     parts = [p.strip() for p in parts if p.strip()]
 
-    if len(parts) > 1:
-        return '• ' + '\n• '.join(parts)
-    elif len(parts) == 1:
-        return '• ' + parts[0]
+    # Rejoin with newlines and bullets
+    if parts:
+        formatted_bullets = '\n• '.join(parts)
+        if prefix:
+            # Keep prefix separate, add newline before bullets
+            return f"{prefix}\n• {formatted_bullets}"
+        else:
+            return f"• {formatted_bullets}"
+
     return text
 
 
