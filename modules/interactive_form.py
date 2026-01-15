@@ -261,41 +261,40 @@ def render_interactive_assessment(knowledge_base: dict) -> Dict:
 
     st.markdown("---")
 
-    # Desktop 8-column grid layout (auto-stacks on mobile)
-    # Phase headers
-    header_cols = st.columns(8, gap="small")
-    for idx, phase in enumerate(PHASES):
-        with header_cols[idx]:
-            st.markdown(f'''
-            <div style="
-                background: {phase['color']};
-                color: {phase.get('text_color', 'white')};
-                padding: 12px 4px;
-                text-align: center;
-                border-radius: 6px;
-                font-weight: 600;
-                font-size: 11px;
-                min-height: 50px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            ">
-                {phase['name']}
-            </div>
-            ''', unsafe_allow_html=True)
+    # Render by phase for proper mobile grouping
+    # Each phase header is followed by its capabilities
+    for phase in PHASES:
+        # Phase header (full width)
+        st.markdown(f'''
+        <div style="
+            background: {phase['color']};
+            color: {phase.get('text_color', 'white')};
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 20px 0 10px 0;
+        ">
+            {phase['name']}
+        </div>
+        ''', unsafe_allow_html=True)
 
-    st.write("")  # Small gap
+        # Get capabilities for THIS phase only
+        phase_caps = get_capabilities_by_phase(phase['id'])
 
-    # Render grid rows
-    for row_idx, row in enumerate(GRID_LAYOUT):
-        row_cols = st.columns(8, gap="small")
-        for col_idx, cell in enumerate(row):
-            with row_cols[col_idx]:
-                if cell is None:
-                    # Empty cell
-                    st.markdown('<div style="height: 120px;"></div>', unsafe_allow_html=True)
-                else:
-                    render_capability_card(cell, row_idx, col_idx, knowledge_base)
+        # Render in responsive grid
+        # On desktop: 3 cards per row within phase
+        # On mobile: auto-stacks to 1 per row
+        cols_per_row = 3
+
+        for i in range(0, len(phase_caps), cols_per_row):
+            row_caps = phase_caps[i:i + cols_per_row]
+            cols = st.columns(len(row_caps), gap="small")
+
+            for col_idx, cap in enumerate(row_caps):
+                with cols[col_idx]:
+                    render_capability_card(cap, knowledge_base)
 
     # Feedback loop footer
     st.markdown("---")
@@ -309,7 +308,7 @@ def render_interactive_assessment(knowledge_base: dict) -> Dict:
     return st.session_state.interactive_scores
 
 
-def render_capability_card(cell: Dict, row_idx: int, col_idx: int, knowledge_base: dict):
+def render_capability_card(cell: Dict, knowledge_base: dict):
     """Render a single capability card with I/R inputs."""
     cap_id = cell["id"]
 
@@ -328,91 +327,80 @@ def render_capability_card(cell: Dict, row_idx: int, col_idx: int, knowledge_bas
     border_color = border_colors.get(priority_class, "#ddd")
     border_width = "3px" if priority_class in ["priority-urgent", "priority-critical", "priority-strength"] else "2px"
 
-    # Build subtitle HTML if exists - as a single complete string
-    subtitle_html = ""
-    if cell.get("subtitle"):
-        subtitle_html = f'''<div style="
-            font-size: 12px;
-            color: #888;
-            font-style: italic;
-            line-height: 1.2;
-            margin-top: 4px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-        ">{cell["subtitle"]}</div>'''
-
-    # Get full description for tooltip
+    # Get full description for popover
     full_desc = get_capability_full_description(cap_id)
 
-    # Simple card HTML - no complex tooltip
-    card_html = f'''<div style="
-        background: white;
-        border: {border_width} solid {border_color};
-        border-radius: 6px;
-        padding: 8px;
-        height: 90px;
-        min-height: 90px;
-        overflow: hidden;
-        margin-bottom: 4px;
-    ">
-        <div style="
-            font-weight: 600;
-            font-size: 13px;
-            color: #333;
-            line-height: 1.2;
-            margin-bottom: 3px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+    # Use container with border for card styling
+    with st.container():
+        # Card HTML with border styling
+        card_html = f'''<div style="
+            background: white;
+            border: {border_width} solid {border_color};
+            border-radius: 6px;
+            padding: 8px;
+            min-height: 60px;
+            margin-bottom: 8px;
         ">
-            {cell["name"]}
-        </div>
-        {subtitle_html}
-    </div>'''
+            <div style="
+                font-weight: 600;
+                font-size: 13px;
+                color: #333;
+                line-height: 1.2;
+                margin-bottom: 3px;
+            ">
+                {cell["name"]}
+            </div>
+            <div style="
+                font-size: 11px;
+                color: #888;
+                font-style: italic;
+                line-height: 1.2;
+            ">
+                {cell.get("subtitle", "")}
+            </div>
+        </div>'''
 
-    # Render card
-    st.markdown(card_html, unsafe_allow_html=True)
+        st.markdown(card_html, unsafe_allow_html=True)
 
-    # Info button with native Streamlit tooltip
-    if st.button("ℹ️", key=f"info_{cap_id}_{row_idx}_{col_idx}", help=full_desc, type="secondary"):
-        pass  # Button click does nothing, tooltip shows on hover
+        # Header: info button in popover
+        col1, col2 = st.columns([0.85, 0.15])
 
-    # Score inputs in two columns (compact)
-    input_col1, input_col2 = st.columns(2)
+        with col2:
+            with st.popover("ℹ️"):
+                st.markdown(f"**{cell['name']}**")
+                st.write(full_desc)
 
-    with input_col1:
-        st.markdown(f'<div class="score-label-i" style="font-size: 11px; font-weight: bold; color: #E6007E; margin-bottom: 2px;">I</div>', unsafe_allow_html=True)
-        i_score = st.number_input(
-            "Importance",
-            min_value=0,
-            max_value=10,
-            value=current_scores["importance"],
-            key=f"i_{cap_id}_{row_idx}_{col_idx}",
-            label_visibility="collapsed"
-        )
+        # Score inputs in two columns (compact)
+        input_col1, input_col2 = st.columns(2)
 
-    with input_col2:
-        st.markdown(f'<div class="score-label-r" style="font-size: 11px; font-weight: bold; color: #00838F; margin-bottom: 2px;">R</div>', unsafe_allow_html=True)
-        r_score = st.number_input(
-            "Readiness",
-            min_value=0,
-            max_value=10,
-            value=current_scores["readiness"],
-            key=f"r_{cap_id}_{row_idx}_{col_idx}",
-            label_visibility="collapsed"
-        )
+        with input_col1:
+            st.markdown(f'<div style="font-size: 11px; font-weight: bold; color: #E6007E; margin-bottom: 2px;">I</div>', unsafe_allow_html=True)
+            i_score = st.number_input(
+                "Importance",
+                min_value=0,
+                max_value=10,
+                value=current_scores["importance"],
+                key=f"i_{cap_id}",
+                label_visibility="collapsed"
+            )
 
-    # Update session state
-    st.session_state.interactive_scores[cap_id] = {
-        "importance": i_score,
-        "readiness": r_score,
-        "phase_id": cell["phase_id"]
-    }
+        with input_col2:
+            st.markdown(f'<div style="font-size: 11px; font-weight: bold; color: #00838F; margin-bottom: 2px;">R</div>', unsafe_allow_html=True)
+            r_score = st.number_input(
+                "Readiness",
+                min_value=0,
+                max_value=10,
+                value=current_scores["readiness"],
+                key=f"r_{cap_id}",
+                label_visibility="collapsed"
+            )
+
+        # Update session state
+        st.session_state.interactive_scores[cap_id] = {
+            "importance": i_score,
+            "readiness": r_score,
+            "phase_id": cell["phase_id"]
+        }
 
 
 def get_priority_class(importance: int, readiness: int) -> str:
