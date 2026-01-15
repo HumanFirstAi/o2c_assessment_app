@@ -49,6 +49,21 @@ def sanitize_branding(text: str) -> str:
     return text
 
 
+def fix_bullet_formatting(text: str) -> str:
+    """
+    Ensure bullets are on separate lines, not inline.
+    Fixes patterns like "• Item 1 • Item 2" to proper line breaks.
+    """
+    # Replace inline bullets (bullets preceded by text/bullet) with newline bullets
+    # Matches: text followed by bullet, or bullet followed by spaces and another bullet
+    text = re.sub(r'([a-zA-Z0-9.,)]\s*)•\s*', r'\1\n• ', text)
+
+    # Clean up any double newlines created
+    text = re.sub(r'\n\n\n+', '\n\n', text)
+
+    return text
+
+
 # System prompt for Claude synthesis
 SYNTHESIS_SYSTEM_PROMPT = """You are a strategic consultant synthesizing an O2C (Order-to-Cash) assessment report. You must ONLY use information provided in the user message - you are a librarian organizing content, not an inventor.
 
@@ -110,26 +125,32 @@ OUTPUT FORMAT (follow exactly):
 **Available Today:**
 
 *AI Agents:*
-[Bullet each relevant agent with a short description of what it does]
+• [Agent Name] - [what it does in 5-8 words]
+• [Agent Name] - [what it does in 5-8 words]
 
 *Platform Features:*
-[Bullet 3-5 most relevant features]
+• [Feature 1]
+• [Feature 2]
+• [Feature 3]
 
 *MCP Tools:*
-[Bullet 2-3 most relevant MCP capabilities]
+• [Tool 1]
+• [Tool 2]
 
 **What's Coming:**
-[Bullet 2-3 upcoming capabilities from the provided list - NO timelines, just the capabilities]
+• [Upcoming capability 1]
+• [Upcoming capability 2]
 
 **Business Impact:**
 [One sentence on the outcome of closing this gap]
 
-RULES:
+CRITICAL FORMATTING RULES:
+- Each bullet point MUST be on its own line (with a line break before it)
+- Use the bullet character • at the start of each line
+- Do NOT put multiple bullets on the same line like "• Item 1 • Item 2"
 - Keep "Why This Matters" to 2-3 sentences MAX
-- Each bullet should be ONE line
 - Agent descriptions: "[Agent Name] - [what it does in 5-8 words]"
 - Only include the MOST relevant items, not everything
-- No dense paragraphs
 - Be specific, not generic
 - Do NOT include timelines in "What's Coming" - just list the capabilities
 """,
@@ -557,6 +578,9 @@ def generate_strategic_report(
         report += "\n\n---\n\n## Report Validation Warnings\n\n"
         for warning in warnings:
             report += f"- {warning}\n"
+
+    # Fix bullet formatting (ensure bullets on separate lines)
+    report = fix_bullet_formatting(report)
 
     # Sanitize branding (remove Zuora except MCP references)
     report = sanitize_branding(report)
