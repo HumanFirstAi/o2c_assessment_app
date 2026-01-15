@@ -101,116 +101,87 @@ def export_to_docx(report_markdown: str, customer_context: Dict = None) -> bytes
 
 def export_to_pdf(report_markdown: str, customer_context: Dict = None) -> bytes:
     """
-    Export markdown report to PDF format using WeasyPrint.
+    Export markdown report to PDF format using fpdf2 (pure Python, no system deps).
     Returns bytes that can be downloaded.
     """
     try:
-        from weasyprint import HTML, CSS
-        from weasyprint.text.fonts import FontConfiguration
+        from fpdf import FPDF
 
-        # Convert markdown to HTML
-        html_content = markdown.markdown(
-            report_markdown,
-            extensions=['tables', 'fenced_code', 'nl2br']
-        )
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=15)
 
-        # Add HTML wrapper with styling
-        full_html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <title>O2C AI Agent & MCP Readiness Assessment</title>
-            <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                    line-height: 1.6;
-                    max-width: 800px;
-                    margin: 40px auto;
-                    padding: 20px;
-                    color: #333;
-                }}
-                h1 {{
-                    color: #2E7D32;
-                    border-bottom: 3px solid #2E7D32;
-                    padding-bottom: 10px;
-                }}
-                h2 {{
-                    color: #1565C0;
-                    border-bottom: 2px solid #1565C0;
-                    padding-bottom: 8px;
-                    margin-top: 30px;
-                }}
-                h3 {{
-                    color: #7B1FA2;
-                    margin-top: 20px;
-                }}
-                table {{
-                    border-collapse: collapse;
-                    width: 100%;
-                    margin: 20px 0;
-                }}
-                th, td {{
-                    border: 1px solid #ddd;
-                    padding: 12px;
-                    text-align: left;
-                }}
-                th {{
-                    background-color: #f5f5f5;
-                    font-weight: bold;
-                }}
-                code {{
-                    background-color: #f5f5f5;
-                    padding: 2px 5px;
-                    border-radius: 3px;
-                    font-family: monospace;
-                }}
-                pre {{
-                    background-color: #f5f5f5;
-                    padding: 15px;
-                    border-radius: 5px;
-                    overflow-x: auto;
-                }}
-                .customer-info {{
-                    background-color: #f9f9f9;
-                    padding: 15px;
-                    border-left: 4px solid #2E7D32;
-                    margin-bottom: 30px;
-                }}
-            </style>
-        </head>
-        <body>
-        """
+        # Set font
+        pdf.set_font("Helvetica", size=10)
 
-        # Add customer context
+        # Title
+        pdf.set_font("Helvetica", "B", size=16)
+        pdf.cell(0, 10, "O2C AI Agent & MCP Readiness Assessment", ln=True, align="C")
+
+        # Customer context
         if customer_context:
             user = customer_context.get('user', '')
             email = customer_context.get('email', '')
 
-            full_html += '<div class="customer-info">'
+            pdf.set_font("Helvetica", size=10)
             if user:
-                full_html += f'<p><strong>Prepared for:</strong> {user}</p>'
+                pdf.cell(0, 6, f"Prepared for: {user}", ln=True, align="C")
             if email:
-                full_html += f'<p><strong>Email:</strong> {email}</p>'
-            full_html += '</div>'
+                pdf.cell(0, 6, f"Email: {email}", ln=True, align="C")
 
-        full_html += html_content
-        full_html += """
-        </body>
-        </html>
-        """
+        pdf.ln(10)
 
-        # Generate PDF
-        font_config = FontConfiguration()
-        html_doc = HTML(string=full_html)
-        pdf_bytes = html_doc.write_pdf(font_config=font_config)
+        # Process markdown to text
+        lines = report_markdown.split('\n')
 
-        return pdf_bytes
+        for line in lines:
+            line = line.strip()
 
-    except ImportError:
-        # Fallback if WeasyPrint is not available
-        # Return a simple text message
-        message = "PDF export requires WeasyPrint library. Please install it with: pip install weasyprint"
+            if not line:
+                pdf.ln(5)
+                continue
+
+            # Headers
+            if line.startswith('### '):
+                pdf.set_font("Helvetica", "B", size=12)
+                pdf.multi_cell(0, 6, line.replace('### ', ''))
+                pdf.set_font("Helvetica", size=10)
+            elif line.startswith('## '):
+                pdf.set_font("Helvetica", "B", size=14)
+                pdf.multi_cell(0, 8, line.replace('## ', ''))
+                pdf.set_font("Helvetica", size=10)
+            elif line.startswith('# '):
+                pdf.set_font("Helvetica", "B", size=16)
+                pdf.multi_cell(0, 10, line.replace('# ', ''))
+                pdf.set_font("Helvetica", size=10)
+
+            # Bold text
+            elif line.startswith('**') and line.endswith('**'):
+                pdf.set_font("Helvetica", "B", size=10)
+                pdf.multi_cell(0, 6, line.replace('**', ''))
+                pdf.set_font("Helvetica", size=10)
+
+            # Bullets
+            elif line.startswith('• ') or line.startswith('- ') or line.startswith('* '):
+                pdf.set_x(15)  # Indent
+                clean_line = line[2:] if line.startswith(('• ', '- ', '* ')) else line
+                # Remove markdown formatting
+                clean_line = re.sub(r'\*\*(.*?)\*\*', r'\1', clean_line)  # Bold
+                clean_line = re.sub(r'\*(.*?)\*', r'\1', clean_line)  # Italic
+                pdf.multi_cell(0, 5, clean_line)
+
+            # Regular text
+            else:
+                # Remove markdown formatting
+                clean_line = re.sub(r'\*\*(.*?)\*\*', r'\1', line)  # Bold
+                clean_line = re.sub(r'\*(.*?)\*', r'\1', clean_line)  # Italic
+                pdf.multi_cell(0, 5, clean_line)
+
+        return pdf.output()
+
+    except Exception as e:
+        # Fallback if fpdf2 has issues
+        message = f"PDF export error: {str(e)}. Please try Word export instead."
         return message.encode('utf-8')
 
 

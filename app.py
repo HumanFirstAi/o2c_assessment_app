@@ -33,6 +33,32 @@ st.set_page_config(
     initial_sidebar_state="auto"  # Collapses on mobile
 )
 
+
+def init_session_state():
+    """Initialize all session state variables."""
+    defaults = {
+        "authenticated": False,
+        "user": None,
+        "session_token": None,
+        "selected_capability": None,
+        "generated_report": None,
+        "priority_matrix": None,
+        "report": None,
+        "scores": {},
+        "interactive_scores": {},
+        "show_zero_warning": False,
+        "confirm_generate": False,
+        "zero_count": 0,
+    }
+
+    for key, default_value in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = default_value
+
+
+# Initialize session state
+init_session_state()
+
 # Inject viewport meta tag for mobile responsiveness
 st.components.v1.html("""
 <script>

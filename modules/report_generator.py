@@ -51,26 +51,51 @@ def sanitize_branding(text: str) -> str:
 
 def fix_bullet_formatting(text: str) -> str:
     """
-    Ensure bullets are on separate lines, not inline.
-    Fixes patterns like "• Item 1 • Item 2" to proper line breaks.
-    Also handles dash bullets.
+    Force bullets onto separate lines.
+    Handles: "• Item 1 • Item 2" -> "• Item 1\n• Item 2"
     """
-    # Fix inline bullets (• or -) that appear after text on the same line
-    # Pattern 1: "text • item" or "text - item" -> "text\n• item"
-    text = re.sub(r'([a-zA-Z0-9.,)\]\'"]\s*)•\s*', r'\1\n• ', text)
-    text = re.sub(r'([a-zA-Z0-9.,)\]\'"]\s*)-\s+', r'\1\n- ', text)
+    # First, normalize any weird bullet characters
+    text = text.replace('●', '•').replace('○', '•')
 
-    # Pattern 2: "• item1 • item2" -> "• item1\n• item2"
-    text = re.sub(r'(•[^•\n]+)\s*•\s*', r'\1\n• ', text)
+    # Split on bullet and rejoin with newlines
+    # This handles: "• A • B • C" -> "• A\n• B\n• C"
+    parts = re.split(r'\s*•\s*', text)
 
-    # Pattern 3: Fix "What's Coming: • item" -> "What's Coming:\n• item"
-    text = re.sub(r'(:\s*)•\s*', r'\1\n• ', text)
-    text = re.sub(r'(:\s*)-\s+', r'\1\n- ', text)
+    # Filter empty parts and rejoin
+    parts = [p.strip() for p in parts if p.strip()]
 
-    # Clean up any excessive newlines created (max 2 consecutive)
-    text = re.sub(r'\n\n\n+', '\n\n', text)
-
+    if len(parts) > 1:
+        return '• ' + '\n• '.join(parts)
+    elif len(parts) == 1:
+        return '• ' + parts[0]
     return text
+
+
+def fix_all_bullet_sections(report: str) -> str:
+    """Fix bullet formatting in all sections of the report."""
+
+    # Find sections that have bullets
+    sections = [
+        "Platform Features:",
+        "MCP Tools:",
+        "What's Coming:",
+        "AI Agents:",
+        "Available Today:",
+    ]
+
+    for section in sections:
+        # Find content after section header until next section or double newline
+        pattern = rf'(\*\*{re.escape(section)}\*\*\s*)(.*?)(?=\n\n|\*\*[A-Z]|\Z)'
+
+        def fix_match(match):
+            header = match.group(1)
+            content = match.group(2)
+            fixed_content = fix_bullet_formatting(content)
+            return header + '\n' + fixed_content
+
+        report = re.sub(pattern, fix_match, report, flags=re.DOTALL)
+
+    return report
 
 
 # System prompt for Claude synthesis
@@ -594,7 +619,7 @@ def generate_strategic_report(
             report += f"- {warning}\n"
 
     # Fix bullet formatting (ensure bullets on separate lines)
-    report = fix_bullet_formatting(report)
+    report = fix_all_bullet_sections(report)
 
     # Sanitize branding (remove Zuora except MCP references)
     report = sanitize_branding(report)

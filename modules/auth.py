@@ -9,6 +9,15 @@ from typing import Optional
 
 from config import USER_LOGS_DIR
 from modules.admin import load_allowed_users as load_users_from_file
+from modules.session_manager import (
+    generate_session_token,
+    save_session,
+    load_session,
+    delete_session,
+    get_session_token_from_cookie,
+    set_session_cookie,
+    clear_session_cookie
+)
 
 # Allowed users - fallback if no file uploaded
 ALLOWED_USERS = [
@@ -80,7 +89,7 @@ def render_login_form() -> Optional[dict]:
                     st.error("⚠️ Email not authorized. Contact your administrator.")
                     return None
 
-                # Store user session
+                # Store user session with persistent token
                 user_data = {
                     "name": name.strip(),
                     "email": email.strip().lower(),
@@ -88,11 +97,8 @@ def render_login_form() -> Optional[dict]:
                     "session_id": hashlib.md5(f"{email}{datetime.now()}".encode()).hexdigest()[:12]
                 }
 
-                st.session_state["user"] = user_data
-                st.session_state["authenticated"] = True
-
-                # Log login
-                log_user_activity(user_data, "login")
+                # Use login_user for persistent session
+                login_user(user_data)
 
                 st.rerun()
 
@@ -100,8 +106,24 @@ def render_login_form() -> Optional[dict]:
 
 
 def check_authentication() -> bool:
-    """Check if user is authenticated."""
-    return st.session_state.get("authenticated", False)
+    """Check if user is authenticated via session state or cookie."""
+
+    # Already authenticated in this session
+    if st.session_state.get("authenticated", False):
+        return True
+
+    # Check for session cookie/token
+    token = get_session_token_from_cookie()
+    if token:
+        user_data = load_session(token)
+        if user_data:
+            # Restore session
+            st.session_state["authenticated"] = True
+            st.session_state["user"] = user_data
+            st.session_state["session_token"] = token
+            return True
+
+    return False
 
 
 def get_current_user() -> Optional[dict]:
@@ -109,12 +131,42 @@ def get_current_user() -> Optional[dict]:
     return st.session_state.get("user", None)
 
 
+def login_user(user_data: dict):
+    """Log in user and create persistent session."""
+    token = generate_session_token(user_data["email"])
+
+    # Save to file
+    save_session(user_data, token)
+
+    # Set in session state
+    st.session_state["authenticated"] = True
+    st.session_state["user"] = user_data
+    st.session_state["session_token"] = token
+
+    # Set cookie
+    set_session_cookie(token)
+
+    # Log login
+    log_user_activity(user_data, "login")
+
+
 def logout():
-    """Clear user session."""
+    """Log out user and clear session."""
+    # Log logout first
     if "user" in st.session_state:
         log_user_activity(st.session_state["user"], "logout")
+
+    token = st.session_state.get("session_token")
+
+    if token:
+        delete_session(token)
+        clear_session_cookie()
+
+    # Clear session state
     st.session_state["authenticated"] = False
     st.session_state["user"] = None
+    st.session_state["session_token"] = None
+
     st.rerun()
 
 
