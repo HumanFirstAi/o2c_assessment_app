@@ -549,16 +549,19 @@ if 'report' in st.session_state:
 
     # Priority Matrix Visualization
     with st.expander("🎯 Priority Matrix Overview", expanded=True):
-        pm = st.session_state['priority_matrix']
+        pm = st.session_state.get('priority_matrix', None)
 
-        cols = st.columns(6)
-        categories = ["URGENT_GAP", "CRITICAL_GAP", "STRENGTH", "OPPORTUNITY", "MAINTAIN", "DEPRIORITIZE"]
-        colors = ["🔴", "🟠", "🟢", "🟡", "🔵", "⚪"]
+        if pm:
+            cols = st.columns(6)
+            categories = ["URGENT_GAP", "CRITICAL_GAP", "STRENGTH", "OPPORTUNITY", "MAINTAIN", "DEPRIORITIZE"]
+            colors = ["🔴", "🟠", "🟢", "🟡", "🔵", "⚪"]
 
-        for i, (cat, color) in enumerate(zip(categories, colors)):
-            with cols[i]:
-                count = pm.get(cat, 0)
-                st.metric(cat.replace("_", " ").title(), f"{color} {count}")
+            for i, (cat, color) in enumerate(zip(categories, colors)):
+                with cols[i]:
+                    count = pm.get(cat, 0)
+                    st.metric(cat.replace("_", " ").title(), f"{color} {count}")
+        else:
+            st.info("Priority matrix data not available. Please generate a report first.")
 
     # Full Report
     st.markdown("""
