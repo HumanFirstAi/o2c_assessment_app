@@ -1,6 +1,7 @@
 # modules/storage.py
 import json
 import os
+import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -21,27 +22,54 @@ def get_user_storage_path(email: str) -> Path:
 
 
 def save_assessment(user: dict, scores: dict, report: str) -> str:
-    """Save user's assessment and report."""
+    """
+    Save user's assessment and report with atomic writes.
+    Uses UUID to prevent race conditions and temp files for atomicity.
+    """
     user_dir = get_user_storage_path(user["email"])
 
+    # Add UUID to prevent timestamp collisions during concurrent saves
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    assessment_id = f"{timestamp}_{user['session_id']}"
+    unique_id = uuid.uuid4().hex[:8]
+    assessment_id = f"{timestamp}_{unique_id}"
 
-    # Save scores
-    scores_file = user_dir / f"scores_{assessment_id}.json"
+    # Prepare data
     scores_data = {
         "assessment_id": assessment_id,
         "user": user,
         "timestamp": datetime.now().isoformat(),
         "scores": scores
     }
-    with open(scores_file, "w") as f:
-        json.dump(scores_data, f, indent=2)
 
-    # Save report
+    # Save scores with atomic write (temp file + rename)
+    scores_file = user_dir / f"scores_{assessment_id}.json"
+    temp_scores_file = user_dir / f".scores_{assessment_id}.json.tmp"
+
+    try:
+        with open(temp_scores_file, "w") as f:
+            json.dump(scores_data, f, indent=2)
+        # Atomic rename - prevents partial writes
+        temp_scores_file.rename(scores_file)
+    except Exception as e:
+        # Cleanup temp file on error
+        if temp_scores_file.exists():
+            temp_scores_file.unlink()
+        raise e
+
+    # Save report with atomic write
     report_file = user_dir / f"report_{assessment_id}.md"
-    with open(report_file, "w") as f:
-        f.write(report)
+    temp_report_file = user_dir / f".report_{assessment_id}.md.tmp"
+
+    try:
+        with open(temp_report_file, "w") as f:
+            f.write(report)
+        # Atomic rename
+        temp_report_file.rename(report_file)
+    except Exception as e:
+        # Cleanup temp file on error
+        if temp_report_file.exists():
+            temp_report_file.unlink()
+        raise e
 
     return assessment_id
 

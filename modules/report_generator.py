@@ -2,6 +2,7 @@ import anthropic
 import json
 import os
 import re
+import time
 from typing import Dict, List
 from datetime import datetime
 import config
@@ -11,6 +12,10 @@ from modules.score_analyzer import (
     get_capabilities_by_category,
     get_phase_summary
 )
+
+# Simple rate limiter to prevent API overload
+_last_api_call = 0
+_api_call_interval = 0.5  # Minimum 0.5 seconds between calls (120 calls/min max)
 
 # Initialize Claude API client
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
@@ -243,6 +248,17 @@ VALID AGENT NAMES (only reference these):
 Do NOT reference any agent not in this list."""
 
     try:
+        # Rate limiting: enforce minimum interval between API calls
+        global _last_api_call
+        current_time = time.time()
+        time_since_last_call = current_time - _last_api_call
+
+        if time_since_last_call < _api_call_interval:
+            sleep_time = _api_call_interval - time_since_last_call
+            time.sleep(sleep_time)
+
+        # Make API call
+        _last_api_call = time.time()
         response = client.messages.create(
             model=config.CLAUDE_MODEL,
             max_tokens=config.CLAUDE_MAX_TOKENS,
@@ -252,6 +268,24 @@ Do NOT reference any agent not in this list."""
             ]
         )
         return response.content[0].text
+
+    except anthropic.RateLimitError as e:
+        # Handle rate limit errors with exponential backoff
+        print(f"Rate limit hit: {e}. Retrying after delay...")
+        time.sleep(2)  # Wait 2 seconds and retry once
+        try:
+            response = client.messages.create(
+                model=config.CLAUDE_MODEL,
+                max_tokens=config.CLAUDE_MAX_TOKENS,
+                system=SYNTHESIS_SYSTEM_PROMPT,
+                messages=[
+                    {"role": "user", "content": user_prompt}
+                ]
+            )
+            return response.content[0].text
+        except Exception as retry_error:
+            print(f"Retry failed: {retry_error}. Falling back to template.")
+            return context_content
 
     except Exception as e:
         # Fallback to template-based if API fails
