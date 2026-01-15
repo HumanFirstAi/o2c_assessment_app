@@ -107,11 +107,20 @@ def export_to_pdf(report_markdown: str, customer_context: Dict = None) -> bytes:
     try:
         from fpdf import FPDF
 
-        pdf = FPDF()
+        class PDF(FPDF):
+            def header(self):
+                pass
+
+            def footer(self):
+                self.set_y(-15)
+                self.set_font('Helvetica', 'I', 8)
+                self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
+
+        pdf = PDF()
         pdf.add_page()
         pdf.set_auto_page_break(auto=True, margin=15)
 
-        # Set font
+        # Set default font
         pdf.set_font("Helvetica", size=10)
 
         # Title
@@ -138,51 +147,84 @@ def export_to_pdf(report_markdown: str, customer_context: Dict = None) -> bytes:
             line = line.strip()
 
             if not line:
-                pdf.ln(5)
+                pdf.ln(4)
+                continue
+
+            # Skip table separators
+            if line.startswith('|--') or line.startswith('---'):
                 continue
 
             # Headers
-            if line.startswith('### '):
-                pdf.set_font("Helvetica", "B", size=12)
-                pdf.multi_cell(0, 6, line.replace('### ', ''))
+            if line.startswith('#### '):
+                pdf.set_font("Helvetica", "B", size=11)
+                text = line.replace('#### ', '')
+                # Handle special characters
+                text = text.encode('latin-1', 'replace').decode('latin-1')
+                pdf.multi_cell(0, 6, text)
                 pdf.set_font("Helvetica", size=10)
+                pdf.ln(2)
+            elif line.startswith('### '):
+                pdf.set_font("Helvetica", "B", size=12)
+                text = line.replace('### ', '')
+                text = text.encode('latin-1', 'replace').decode('latin-1')
+                pdf.multi_cell(0, 6, text)
+                pdf.set_font("Helvetica", size=10)
+                pdf.ln(2)
             elif line.startswith('## '):
                 pdf.set_font("Helvetica", "B", size=14)
-                pdf.multi_cell(0, 8, line.replace('## ', ''))
+                text = line.replace('## ', '')
+                text = text.encode('latin-1', 'replace').decode('latin-1')
+                pdf.multi_cell(0, 8, text)
                 pdf.set_font("Helvetica", size=10)
+                pdf.ln(3)
             elif line.startswith('# '):
                 pdf.set_font("Helvetica", "B", size=16)
-                pdf.multi_cell(0, 10, line.replace('# ', ''))
+                text = line.replace('# ', '')
+                text = text.encode('latin-1', 'replace').decode('latin-1')
+                pdf.multi_cell(0, 10, text)
                 pdf.set_font("Helvetica", size=10)
-
-            # Bold text
-            elif line.startswith('**') and line.endswith('**'):
-                pdf.set_font("Helvetica", "B", size=10)
-                pdf.multi_cell(0, 6, line.replace('**', ''))
-                pdf.set_font("Helvetica", size=10)
+                pdf.ln(4)
 
             # Bullets
             elif line.startswith('• ') or line.startswith('- ') or line.startswith('* '):
-                pdf.set_x(15)  # Indent
+                pdf.set_x(20)  # Indent
                 clean_line = line[2:] if line.startswith(('• ', '- ', '* ')) else line
                 # Remove markdown formatting
                 clean_line = re.sub(r'\*\*(.*?)\*\*', r'\1', clean_line)  # Bold
                 clean_line = re.sub(r'\*(.*?)\*', r'\1', clean_line)  # Italic
-                pdf.multi_cell(0, 5, clean_line)
+                # Handle special characters
+                clean_line = clean_line.encode('latin-1', 'replace').decode('latin-1')
+                pdf.multi_cell(0, 5, f"  • {clean_line}")
 
             # Regular text
             else:
                 # Remove markdown formatting
                 clean_line = re.sub(r'\*\*(.*?)\*\*', r'\1', line)  # Bold
                 clean_line = re.sub(r'\*(.*?)\*', r'\1', clean_line)  # Italic
-                pdf.multi_cell(0, 5, clean_line)
+                # Handle special characters
+                clean_line = clean_line.encode('latin-1', 'replace').decode('latin-1')
+                if clean_line:
+                    pdf.multi_cell(0, 5, clean_line)
 
-        return pdf.output()
+        # Return bytes
+        return bytes(pdf.output())
 
     except Exception as e:
-        # Fallback if fpdf2 has issues
-        message = f"PDF export error: {str(e)}. Please try Word export instead."
-        return message.encode('utf-8')
+        # Create an error PDF instead of returning text
+        import traceback
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Helvetica", "B", size=14)
+        pdf.cell(0, 10, "PDF Export Error", ln=True)
+        pdf.set_font("Helvetica", size=10)
+        pdf.ln(5)
+        pdf.multi_cell(0, 5, f"Error: {str(e)}")
+        pdf.ln(5)
+        pdf.multi_cell(0, 5, "Please try downloading as DOCX or Markdown instead.")
+        pdf.ln(10)
+        pdf.set_font("Helvetica", size=8)
+        pdf.multi_cell(0, 4, f"Technical details:\n{traceback.format_exc()}")
+        return bytes(pdf.output())
 
 
 def export_to_markdown(report_markdown: str, customer_context: Dict = None) -> str:
