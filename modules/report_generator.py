@@ -53,12 +53,21 @@ def fix_bullet_formatting(text: str) -> str:
     """
     Ensure bullets are on separate lines, not inline.
     Fixes patterns like "• Item 1 • Item 2" to proper line breaks.
+    Also handles dash bullets.
     """
-    # Replace inline bullets (bullets preceded by text/bullet) with newline bullets
-    # Matches: text followed by bullet, or bullet followed by spaces and another bullet
-    text = re.sub(r'([a-zA-Z0-9.,)]\s*)•\s*', r'\1\n• ', text)
+    # Fix inline bullets (• or -) that appear after text on the same line
+    # Pattern 1: "text • item" or "text - item" -> "text\n• item"
+    text = re.sub(r'([a-zA-Z0-9.,)\]\'"]\s*)•\s*', r'\1\n• ', text)
+    text = re.sub(r'([a-zA-Z0-9.,)\]\'"]\s*)-\s+', r'\1\n- ', text)
 
-    # Clean up any double newlines created
+    # Pattern 2: "• item1 • item2" -> "• item1\n• item2"
+    text = re.sub(r'(•[^•\n]+)\s*•\s*', r'\1\n• ', text)
+
+    # Pattern 3: Fix "What's Coming: • item" -> "What's Coming:\n• item"
+    text = re.sub(r'(:\s*)•\s*', r'\1\n• ', text)
+    text = re.sub(r'(:\s*)-\s+', r'\1\n- ', text)
+
+    # Clean up any excessive newlines created (max 2 consecutive)
     text = re.sub(r'\n\n\n+', '\n\n', text)
 
     return text
@@ -144,15 +153,20 @@ OUTPUT FORMAT (follow exactly):
 **Business Impact:**
 [One sentence on the outcome of closing this gap]
 
-CRITICAL FORMATTING RULES:
-- Each bullet point MUST be on its own line (with a line break before it)
-- Use the bullet character • at the start of each line
-- Do NOT put multiple bullets on the same line like "• Item 1 • Item 2"
-- Keep "Why This Matters" to 2-3 sentences MAX
-- Agent descriptions: "[Agent Name] - [what it does in 5-8 words]"
-- Only include the MOST relevant items, not everything
-- Be specific, not generic
-- Do NOT include timelines in "What's Coming" - just list the capabilities
+CRITICAL FORMATTING RULES - READ CAREFULLY:
+1. Each bullet point MUST be on its own line with a line break before it
+2. Use the bullet character • at the start of each line
+3. NEVER EVER put multiple bullets on the same line (NO: "• Item 1 • Item 2")
+4. Correct format example:
+   **What's Coming:**
+   • First item
+   • Second item
+   • Third item
+5. Keep "Why This Matters" to 2-3 sentences MAX
+6. Agent descriptions: "[Agent Name] - [what it does in 5-8 words]"
+7. Only include the MOST relevant items, not everything
+8. Be specific, not generic
+9. Do NOT include timelines in "What's Coming" - just list the capabilities
 """,
 
         "strength": """Synthesize this strength into a STRUCTURED format.

@@ -309,72 +309,32 @@ def render_interactive_assessment(knowledge_base: dict) -> Dict:
 
 
 def render_capability_card(cell: Dict, knowledge_base: dict):
-    """Render a single capability card with I/R inputs."""
+    """Render a single capability card with I/R inputs - everything in ONE container."""
     cap_id = cell["id"]
 
     # Get current scores (default to 0 - empty/not scored)
     current_scores = st.session_state.interactive_scores.get(cap_id, {"importance": 0, "readiness": 0})
 
-    # Determine priority border color
-    priority_class = get_priority_class(current_scores["importance"], current_scores["readiness"])
-    border_colors = {
-        "priority-urgent": "#dc3545",
-        "priority-critical": "#fd7e14",
-        "priority-strength": "#28a745",
-        "priority-opportunity": "#ffc107",
-        "": "#ddd"
-    }
-    border_color = border_colors.get(priority_class, "#ddd")
-    border_width = "3px" if priority_class in ["priority-urgent", "priority-critical", "priority-strength"] else "2px"
-
     # Get full description for popover
     full_desc = get_capability_full_description(cap_id)
 
-    # Use container with border for card styling
-    with st.container():
-        # Card HTML with border styling
-        card_html = f'''<div style="
-            background: white;
-            border: {border_width} solid {border_color};
-            border-radius: 6px;
-            padding: 8px;
-            min-height: 60px;
-            margin-bottom: 8px;
-        ">
-            <div style="
-                font-weight: 600;
-                font-size: 13px;
-                color: #333;
-                line-height: 1.2;
-                margin-bottom: 3px;
-            ">
-                {cell["name"]}
-            </div>
-            <div style="
-                font-size: 11px;
-                color: #888;
-                font-style: italic;
-                line-height: 1.2;
-            ">
-                {cell.get("subtitle", "")}
-            </div>
-        </div>'''
+    # EVERYTHING inside ONE bordered container
+    with st.container(border=True):
+        # Card title and subtitle
+        st.markdown(f"**{cell['name']}**")
+        if cell.get("subtitle"):
+            st.caption(cell.get("subtitle"))
 
-        st.markdown(card_html, unsafe_allow_html=True)
+        # Info button with popover - INSIDE container
+        with st.popover("ℹ️ Info"):
+            st.markdown(f"**{cell['name']}**")
+            st.write(full_desc)
 
-        # Header: info button in popover
-        col1, col2 = st.columns([0.85, 0.15])
-
-        with col2:
-            with st.popover("ℹ️"):
-                st.markdown(f"**{cell['name']}**")
-                st.write(full_desc)
-
-        # Score inputs in two columns (compact)
+        # Score inputs in two columns - INSIDE same container
         input_col1, input_col2 = st.columns(2)
 
         with input_col1:
-            st.markdown(f'<div style="font-size: 11px; font-weight: bold; color: #E6007E; margin-bottom: 2px;">I</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size: 11px; font-weight: bold; color: #E6007E; margin-bottom: 2px;">I</div>', unsafe_allow_html=True)
             i_score = st.number_input(
                 "Importance",
                 min_value=0,
@@ -385,7 +345,7 @@ def render_capability_card(cell: Dict, knowledge_base: dict):
             )
 
         with input_col2:
-            st.markdown(f'<div style="font-size: 11px; font-weight: bold; color: #00838F; margin-bottom: 2px;">R</div>', unsafe_allow_html=True)
+            st.markdown('<div style="font-size: 11px; font-weight: bold; color: #00838F; margin-bottom: 2px;">R</div>', unsafe_allow_html=True)
             r_score = st.number_input(
                 "Readiness",
                 min_value=0,
