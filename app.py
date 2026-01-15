@@ -572,40 +572,45 @@ if 'report' in st.session_state:
     }
     </style>
     """, unsafe_allow_html=True)
-    st.markdown(st.session_state['report'])
+    # Display report content if it exists
+    report_content = st.session_state.get('report')
+    if report_content:
+        st.markdown(report_content)
 
-    # Export Options
-    st.divider()
-    st.header("📥 Export Report")
+        # Export Options
+        st.divider()
+        st.header("📥 Export Report")
 
-    col1, col2, col3 = st.columns(3)
+        col1, col2, col3 = st.columns(3)
 
-    customer_ctx = st.session_state.get('customer_context', {})
-    user_name = customer_ctx.get('user', 'Report').replace(' ', '_')
+        customer_ctx = st.session_state.get('customer_context', {})
+        user_name = customer_ctx.get('user', 'Report').replace(' ', '_')
 
-    with col1:
-        docx_bytes = export_to_docx(st.session_state['report'], customer_ctx)
-        st.download_button(
-            label="📄 Download as DOCX",
-            data=docx_bytes,
-            file_name=f"O2C_Assessment_{user_name}.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
+        with col1:
+            docx_bytes = export_to_docx(report_content, customer_ctx)
+            st.download_button(
+                label="📄 Download as DOCX",
+                data=docx_bytes,
+                file_name=f"O2C_Assessment_{user_name}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
 
-    with col2:
-        pdf_bytes = export_to_pdf(st.session_state['report'], customer_ctx)
-        st.download_button(
-            label="📑 Download as PDF",
-            data=pdf_bytes,
-            file_name=f"O2C_Assessment_{user_name}.pdf",
-            mime="application/pdf"
-        )
+        with col2:
+            pdf_bytes = export_to_pdf(report_content, customer_ctx)
+            st.download_button(
+                label="📑 Download as PDF",
+                data=pdf_bytes,
+                file_name=f"O2C_Assessment_{user_name}.pdf",
+                mime="application/pdf"
+            )
 
-    with col3:
-        md_content = export_to_markdown(st.session_state['report'], customer_ctx)
-        st.download_button(
-            label="📝 Download as Markdown",
-            data=md_content,
-            file_name=f"O2C_Assessment_{user_name}.md",
-            mime="text/markdown"
-        )
+        with col3:
+            md_content = export_to_markdown(report_content, customer_ctx)
+            st.download_button(
+                label="📝 Download as Markdown",
+                data=md_content,
+                file_name=f"O2C_Assessment_{user_name}.md",
+                mime="text/markdown"
+            )
+    else:
+        st.warning("No report content available. Please generate a report first.")
